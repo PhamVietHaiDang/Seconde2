@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Seconde2</string>
+    <string name="search_in_mail">Search in mail</string>
+    <string name="inbox">Inbox</string>
+    <string name="compose">Compose</string>
+    <string name="send">Send</string>
+    <string name="to_hint">To</string>
+    <string name="subject_hint">Subject</string>
+    <string name="message_hint">Compose email</string>
+</resources>
