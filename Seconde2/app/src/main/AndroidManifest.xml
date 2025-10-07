@@ -39,6 +39,11 @@
             android:name=".EmailDetailActivity"
             android:exported="false"
             android:theme="@style/Theme.Seconde2" />
+        <!-- Contract Detail Activity -->
+        <activity
+            android:name=".ContractDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Seconde2" />
 
     </application>
 

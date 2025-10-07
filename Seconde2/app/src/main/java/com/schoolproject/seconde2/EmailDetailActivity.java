@@ -13,118 +13,158 @@ import androidx.fragment.app.FragmentTransaction;
 
 public class EmailDetailActivity extends AppCompatActivity {
 
-    // variables for text views
-    TextView txtSender, txtSubject, txtDate, txtTo, txtBody;
+    // Text views for displaying email information
+    private TextView senderTextView, subjectTextView, dateTextView, recipientTextView, bodyTextView;
 
-    // buttons
-    ImageButton btnBack;
-    LinearLayout btnReply, btnForward;
+    // Buttons for navigation and actions
+    private ImageButton backButton;
+    private LinearLayout replyButton, forwardButton;
 
-    // to store email stuff
-    String sender, subject, date, body;
+    // Variables to store email data
+    private String emailSender, emailSubject, emailDate, emailRecipient, emailBody;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_email_detail);
 
-        // call methods to set things up
-        setupViews();
-        setupClicks();
-        getDataFromIntent();
+        // Set up the activity
+        initializeViews();
+        setupButtonListeners();
+        loadEmailDataFromIntent();
     }
 
-    // method to find all the views by id
-    void setupViews() {
-        txtSender = findViewById(R.id.txtSender);
-        txtSubject = findViewById(R.id.txtSubject);
-        txtDate = findViewById(R.id.txtDate);
-        txtTo = findViewById(R.id.txtTo);
-        txtBody = findViewById(R.id.txtBody);
+    // Find all the views in the layout
+    private void initializeViews() {
+        // Text views for email details
+        senderTextView = findViewById(R.id.txtSender);
+        subjectTextView = findViewById(R.id.txtSubject);
+        dateTextView = findViewById(R.id.txtDate);
+        recipientTextView = findViewById(R.id.txtTo);
+        bodyTextView = findViewById(R.id.txtBody);
 
-        btnBack = findViewById(R.id.btnBack);
-        btnReply = findViewById(R.id.btnReply);
-        btnForward = findViewById(R.id.btnForward);
+        // Action buttons
+        backButton = findViewById(R.id.btnBack);
+        replyButton = findViewById(R.id.btnReply);
+        forwardButton = findViewById(R.id.btnForward);
     }
 
-    // handle button clicks
-    void setupClicks() {
-        // back button just closes this activity
-        btnBack.setOnClickListener(new View.OnClickListener() {
+    // Set up click listeners for all buttons
+    private void setupButtonListeners() {
+        // Back button - returns to previous screen
+        backButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                finish();
+            public void onClick(View view) {
+                goBackToEmailList();
             }
         });
 
-        // reply button
-        btnReply.setOnClickListener(new View.OnClickListener() {
+        // Reply button - opens reply fragment
+        replyButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                // open reply fragment
-                openReply();
+            public void onClick(View view) {
+                openReplyFragment();
             }
         });
 
-        // forward button
-        btnForward.setOnClickListener(new View.OnClickListener() {
+        // Forward button - opens forward fragment
+        forwardButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                // open forward fragment
-                openForward();
+            public void onClick(View view) {
+                openForwardFragment();
             }
         });
+
     }
 
-    // get the email data that was sent to this activity
-    void getDataFromIntent() {
-        Intent i = getIntent();
-        if (i != null) {
-            // get all the strings from intent
-            sender = i.getStringExtra("sender");
-            subject = i.getStringExtra("subject");
-            date = i.getStringExtra("date");
-            body = i.getStringExtra("body");
+    // Get email data from the intent that started this activity
+    private void loadEmailDataFromIntent() {
+        Intent incomingIntent = getIntent();
 
-            // put the data in text views
-            if (sender != null) {
-                txtSender.setText(sender);
-            }
-            if (subject != null) {
-                txtSubject.setText(subject);
-            }
-            if (date != null) {
-                txtDate.setText(date);
-            }
-            if (body != null) {
-                txtBody.setText(body);
-            }
+        if (incomingIntent != null) {
+            // Extract all the email data from intent extras
+            emailSender = incomingIntent.getStringExtra("sender");
+            emailSubject = incomingIntent.getStringExtra("subject");
+            emailDate = incomingIntent.getStringExtra("date");
+            emailRecipient = incomingIntent.getStringExtra("to");
+            emailBody = incomingIntent.getStringExtra("body");
+
+            // Display the data in the text views
+            displayEmailData();
         }
     }
 
-    // method for reply
-    void openReply() {
-        // create reply fragment with the email data
-        Fragment replyFrag = ReplyFragment.newInstance(sender, subject, date, body);
-        showMyFragment(replyFrag);
+    // Display the email data in the text views
+    private void displayEmailData() {
+        // Set sender name
+        if (emailSender != null) {
+            senderTextView.setText(emailSender);
+        } else {
+            senderTextView.setText("Unknown Sender");
+        }
+
+        // Set email subject
+        if (emailSubject != null) {
+            subjectTextView.setText(emailSubject);
+        } else {
+            subjectTextView.setText("No Subject");
+        }
+
+        // Set date
+        if (emailDate != null) {
+            dateTextView.setText(emailDate);
+        } else {
+            dateTextView.setText("Date not available");
+        }
+
+        // Set recipient (if available)
+        if (emailRecipient != null) {
+            recipientTextView.setText(emailRecipient);
+        } else {
+            recipientTextView.setText("user@example.com"); // Default recipient
+        }
+
+        // Set email body
+        if (emailBody != null) {
+            bodyTextView.setText(emailBody);
+        } else {
+            bodyTextView.setText("No content available");
+        }
     }
 
-    // method for forward
-    void openForward() {
-        // create forward fragment with the email data
-        Fragment forwardFrag = ForwardFragment.newInstance(sender, subject, date, body);
-        showMyFragment(forwardFrag);
+    // Open the reply fragment with current email data
+    private void openReplyFragment() {
+        Fragment replyFragment = ReplyFragment.newInstance(emailSender, emailSubject, emailDate, emailBody);
+        displayFragment(replyFragment);
     }
 
-    // helper method to show a fragment
-    void showMyFragment(Fragment frag) {
-        // get fragment manager and start transaction
-        FragmentManager fm = getSupportFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-
-        // replace current fragment and add to back stack
-        ft.replace(android.R.id.content, frag);
-        ft.addToBackStack(null);
-        ft.commit();
+    // Open the forward fragment with current email data
+    private void openForwardFragment() {
+        Fragment forwardFragment = ForwardFragment.newInstance(emailSender, emailSubject, emailDate, emailBody);
+        displayFragment(forwardFragment);
     }
+
+    // Helper method to display any fragment
+    private void displayFragment(Fragment fragment) {
+        // Get the fragment manager
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        // Start a fragment transaction
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+
+        // Replace whatever is in the fragment container with new fragment
+        transaction.replace(android.R.id.content, fragment);
+
+        // Add to back stack so user can go back
+        transaction.addToBackStack(null);
+
+        // Commit the transaction
+        transaction.commit();
+    }
+
+    // Close this activity and return to email list
+    private void goBackToEmailList() {
+        finish();
+    }
+
 }

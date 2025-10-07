@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:background="@drawable/cr15bffffff"
+    android:paddingVertical="13dp"
+    android:paddingHorizontal="14dp"
+    android:orientation="horizontal"
+    android:clickable="true"
+    android:focusable="true">
+
+    <ImageView
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:layout_marginEnd="14dp"
+        android:src="@mipmap/ic_launcher"
+        android:scaleType="fitXY"
+        android:contentDescription="Sender" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginEnd="12dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txtSender"
+            android:textColor="#02110E"
+            android:textSize="15sp"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="Sender Name" />
+
+        <TextView
+            android:id="@+id/txtSubject"
+            android:textColor="#02110E"
+            android:textSize="12sp"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="Email subject and preview text combined..." />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/txtDate"
+        android:textColor="#02110E"
+        android:textSize="12sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="3:41" />
+
+</LinearLayout>

@@ -15,12 +15,19 @@
         android:layout_height="match_parent"
         android:background="#FFFFFF">
 
-        <!-- Main Content ScrollView -->
+        <!-- Fragment Container - MUST BE FIRST so it's underneath -->
+        <FrameLayout
+            android:id="@+id/main_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- Default Inbox Content - Initially visible, will be hidden when fragments show -->
         <ScrollView
-            android:id="@+id/rlrjy4cfowwb"
+            android:id="@+id/main_inbox_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#FFFFFF">
+            android:background="#FFFFFF"
+            android:visibility="visible">
 
             <LinearLayout
                 android:layout_width="match_parent"

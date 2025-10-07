@@ -8,4 +8,5 @@
     <string name="to_hint">To</string>
     <string name="subject_hint">Subject</string>
     <string name="message_hint">Compose email</string>
+
 </resources>
