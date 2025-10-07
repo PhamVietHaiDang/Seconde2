@@ -34,6 +34,12 @@
             android:exported="false"
             android:theme="@style/Theme.Seconde2" />
 
+        <!-- Email Detail Activity -->
+        <activity
+            android:name=".EmailDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Seconde2" />
+
     </application>
 
 </manifest>
