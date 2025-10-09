@@ -1,4 +1,4 @@
-package com.schoolproject.seconde2;
+package com.schoolproject.seconde2.activities;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -14,6 +14,10 @@ import android.widget.PopupMenu;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+
+import com.schoolproject.seconde2.ComposeFragments.ForwardFragment;
+import com.schoolproject.seconde2.R;
+import com.schoolproject.seconde2.ComposeFragments.ReplyFragment;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

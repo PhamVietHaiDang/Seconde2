@@ -1,8 +1,10 @@
-package com.schoolproject.seconde2;
+package com.schoolproject.seconde2.fragments;
 
 import android.content.Intent;
 import android.view.View;
-import androidx.fragment.app.Fragment;
+
+import com.schoolproject.seconde2.BaseEmailFragment.EmailListFragment;
+import com.schoolproject.seconde2.activities.ContractDetailActivity;
 
 public class ContractsFragment extends EmailListFragment {
 

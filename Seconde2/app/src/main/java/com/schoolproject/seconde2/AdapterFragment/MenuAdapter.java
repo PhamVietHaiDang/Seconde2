@@ -1,4 +1,4 @@
-package com.schoolproject.seconde2;
+package com.schoolproject.seconde2.AdapterFragment;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -10,6 +10,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.schoolproject.seconde2.R;
 
 public class MenuAdapter extends ArrayAdapter<String> {
 

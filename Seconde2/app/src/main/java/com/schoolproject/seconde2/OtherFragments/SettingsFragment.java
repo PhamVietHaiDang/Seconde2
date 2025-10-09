@@ -1,4 +1,4 @@
-package com.schoolproject.seconde2;
+package com.schoolproject.seconde2.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,6 +8,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.fragment.app.Fragment;
+
+import com.schoolproject.seconde2.R;
 
 public class SettingsFragment extends Fragment {
 

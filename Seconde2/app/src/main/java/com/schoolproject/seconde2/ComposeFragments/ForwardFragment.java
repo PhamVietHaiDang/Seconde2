@@ -1,4 +1,4 @@
-package com.schoolproject.seconde2;
+package com.schoolproject.seconde2.ComposeFragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,6 +9,10 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.fragment.app.Fragment;
+
+import com.schoolproject.seconde2.EmailConfig;
+import com.schoolproject.seconde2.ServiceFragment.EmailSender;
+import com.schoolproject.seconde2.R;
 
 public class ForwardFragment extends Fragment {
 

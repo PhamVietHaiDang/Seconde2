@@ -1,4 +1,4 @@
-package com.schoolproject.seconde2;
+package com.schoolproject.seconde2.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,6 +9,16 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+
+import com.schoolproject.seconde2.EmailFragments.AllMailFragment;
+import com.schoolproject.seconde2.fragments.ContractsFragment;
+import com.schoolproject.seconde2.EmailFragments.DraftFragment;
+import com.schoolproject.seconde2.EmailFragments.InboxFragment;
+import com.schoolproject.seconde2.EmailFragments.OutlookFragment;
+import com.schoolproject.seconde2.R;
+import com.schoolproject.seconde2.EmailFragments.SentFragment;
+import com.schoolproject.seconde2.fragments.SettingsFragment;
+import com.schoolproject.seconde2.EmailFragments.TrashFragment;
 
 public class MainActivity extends AppCompatActivity {
 

@@ -1,4 +1,4 @@
-package com.schoolproject.seconde2;
+package com.schoolproject.seconde2.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,6 +11,10 @@ import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.schoolproject.seconde2.EmailConfig;
+import com.schoolproject.seconde2.ServiceFragment.EmailSender;
+import com.schoolproject.seconde2.R;
 
 public class ComposeEmailActivity extends AppCompatActivity {
 

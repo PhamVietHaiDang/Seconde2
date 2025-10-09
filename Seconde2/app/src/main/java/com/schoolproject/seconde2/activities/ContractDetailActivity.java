@@ -1,15 +1,16 @@
-package com.schoolproject.seconde2;
+package com.schoolproject.seconde2.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.schoolproject.seconde2.R;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

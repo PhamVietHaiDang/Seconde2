@@ -1,6 +1,9 @@
-package com.schoolproject.seconde2;
+package com.schoolproject.seconde2.ServiceFragment;
 
 import android.os.AsyncTask;
+
+import com.schoolproject.seconde2.EmailConfig;
+
 import javax.mail.*;
 import javax.mail.internet.*;
 import java.util.Properties;

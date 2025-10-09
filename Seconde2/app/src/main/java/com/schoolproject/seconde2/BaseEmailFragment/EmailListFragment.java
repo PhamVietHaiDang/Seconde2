@@ -1,4 +1,4 @@
-package com.schoolproject.seconde2;
+package com.schoolproject.seconde2.BaseEmailFragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,6 +7,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.fragment.app.Fragment;
+
+import com.schoolproject.seconde2.R;
+import com.schoolproject.seconde2.activities.ComposeEmailActivity;
+import com.schoolproject.seconde2.activities.MainActivity;
 
 public class EmailListFragment extends Fragment {
 
