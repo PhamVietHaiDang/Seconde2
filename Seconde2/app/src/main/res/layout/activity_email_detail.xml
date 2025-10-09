@@ -1,176 +1,217 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    android:padding="16dp">
+    android:orientation="vertical"
+    android:background="#FFFFFF">
 
-    <!-- Header with back button and title -->
+    <!-- 1. Toolbar -->
     <RelativeLayout
-        android:id="@+id/header"
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true">
+        android:layout_height="?attr/actionBarSize"
+        android:background="#F5F5F5"
+        android:paddingHorizontal="16dp">
 
+        <!-- Back button on left -->
         <ImageButton
             android:id="@+id/btnBack"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:layout_centerVertical="true"
             android:layout_alignParentStart="true"
             android:src="@drawable/ic_close"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Back"
             android:padding="8dp" />
 
-        <TextView
+        <!-- Action icons on right -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="Email"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:orientation="horizontal">
+
+            <!-- Reply icon -->
+            <ImageButton
+                android:id="@+id/btnToolbarReply"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_reply"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Reply"
+                android:padding="8dp" />
+
+            <!-- Share icon -->
+            <ImageButton
+                android:id="@+id/btnShare"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_share"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Share"
+                android:padding="8dp" />
+
+            <!-- 3-dot menu icon -->
+            <ImageButton
+                android:id="@+id/btnMenu"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_more_vert"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="More options"
+                android:padding="8dp" />
+
+        </LinearLayout>
 
     </RelativeLayout>
 
-    <!-- Scrollable email content -->
+    <!-- Divider line -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E0E0E0" />
+
+    <!-- Scrollable content -->
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/header"
-        android:layout_above="@+id/bottomButtons"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <!-- Sender info -->
-            <TextView
-                android:id="@+id/txtSender"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Son Tran Giang (via USTH Moodle)"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="#02110E" />
-
-            <!-- Subject -->
+            <!-- 2. Email Header -->
             <TextView
                 android:id="@+id/txtSubject"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
                 android:text="mobileApp25-26: Postpone of Moodle test"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="#02110E" />
+                android:textColor="#02110E"
+                android:layout_marginBottom="24dp" />
 
-            <!-- Date and time -->
-            <TextView
-                android:id="@+id/txtDate"
+            <!-- Divider line -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0"
+                android:layout_marginBottom="16dp" />
+
+            <!-- 3. Sender Info Section -->
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="3:41 PM • Sep 30, 2024"
-                android:textSize="12sp"
-                android:textColor="#7F7F7F" />
+                android:layout_marginBottom="16px">
 
-            <!-- To recipients -->
-            <TextView
-                android:id="@+id/txtTo"
+                <!-- Sender's profile picture -->
+                <ImageView
+                    android:id="@+id/imgSenderAvatar"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_alignParentStart="true"
+                    android:src="@mipmap/ic_launcher"
+                    android:scaleType="centerCrop"
+                    android:background="@drawable/cr35bffffff"
+                    android:contentDescription="Sender Avatar" />
+
+                <!-- 3-dot menu button for email content - MOVED HERE -->
+                <ImageButton
+                    android:id="@+id/btnContentMenu"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_more_vert"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Email actions"
+                    android:padding="8dp" />
+
+                <!-- Date sent -->
+                <TextView
+                    android:id="@+id/txtDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@id/btnContentMenu"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="8dp"
+                    android:text="3:41 PM • Sep 30, 2024"
+                    android:textSize="12sp"
+                    android:textColor="#7F7F7F" />
+
+                <!-- Sender name and "To:" info -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@id/imgSenderAvatar"
+                    android:layout_toStartOf="@id/txtDate"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="12dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txtSender"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Son Tran Giang (via USTH Moodle)"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#02110E" />
+
+                    <TextView
+                        android:id="@+id/txtTo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="to: you@example.com"
+                        android:textSize="14sp"
+                        android:textColor="#7F7F7F"
+                        android:layout_marginTop="4dp" />
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <!-- Divider line -->
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="To: you@example.com"
-                android:textSize="14sp"
-                android:textColor="#7F7F7F" />
+                android:layout_height="1dp"
+                android:background="#E0E0E0"
+                android:layout_marginBottom="16dp" />
 
-            <!-- Email body -->
+            <!-- 4. Email Content -->
             <TextView
                 android:id="@+id/txtBody"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
                 android:text="Dear Students,\n\nThis is to inform you that the Moodle test for mobileApp25-26 has been postponed. The new date will be announced soon.\n\nPlease check the announcements forum for updates.\n\nBest regards,\nSon Tran Giang"
                 android:textSize="16sp"
                 android:textColor="#02110E"
-                android:lineSpacingExtra="4dp" />
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="24dp" />
+
+            <!-- Divider line -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0"
+                android:layout_marginBottom="16dp" />
+
+            <!-- 5. Rest of the conversation (placeholder for now) -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No more messages in this conversation"
+                android:textSize="14sp"
+                android:textColor="#7F7F7F"
+                android:gravity="center"
+                android:padding="24dp" />
 
         </LinearLayout>
 
     </ScrollView>
 
-    <!-- Bottom buttons (Reply and Forward) -->
-    <LinearLayout
-        android:id="@+id/bottomButtons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:paddingVertical="8dp"
-        android:background="#F5F5F5">
-
-        <!-- Reply Button -->
-        <LinearLayout
-            android:id="@+id/btnReply"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:paddingVertical="12dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?attr/selectableItemBackground">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_reply"
-                android:tint="#7F7F7F" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Reply"
-                android:textSize="12sp"
-                android:textColor="#7F7F7F" />
-
-        </LinearLayout>
-
-        <!-- Forward Button -->
-        <LinearLayout
-            android:id="@+id/btnForward"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:paddingVertical="12dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?attr/selectableItemBackground">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_forward"
-                android:tint="#7F7F7F" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Forward"
-                android:textSize="12sp"
-                android:textColor="#7F7F7F" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-</RelativeLayout>
+</LinearLayout>

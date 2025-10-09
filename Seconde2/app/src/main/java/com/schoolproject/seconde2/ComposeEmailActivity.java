@@ -1,5 +1,6 @@
 package com.schoolproject.seconde2;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,17 +14,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class ComposeEmailActivity extends AppCompatActivity {
 
-    // UI elements for email fields
+    // All the input fields
     private EditText fromField, toField, ccField, bccField, subjectField, messageField;
-
-    // Buttons for actions
     private Button sendButton;
     private ImageButton exitButton, attachButton, sendIconButton, settingsButton, expandToButton;
-
-    // Loading indicator
     private ProgressBar loadingBar;
 
-    // Track if CC/BCC fields are visible
+    // Track if CC and BCC fields are showing
     private boolean areCcBccVisible = false;
 
     @Override
@@ -31,11 +28,13 @@ public class ComposeEmailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_compose_email);
 
-        setupUIElements();
-        setupButtonListeners();
+        // Set up all the views and buttons
+        findViews();
+        setupButtons();
+        prefillFields();
     }
 
-    private void setupUIElements() {
+    private void findViews() {
         // Find all the email input fields
         fromField = findViewById(R.id.editFrom);
         toField = findViewById(R.id.editTo);
@@ -52,232 +51,247 @@ public class ComposeEmailActivity extends AppCompatActivity {
         settingsButton = findViewById(R.id.btnSettings);
         expandToButton = findViewById(R.id.btnExpandTo);
 
-        // Find the progress bar
+        // Find the loading progress bar
         loadingBar = findViewById(R.id.progressBar);
 
-        // Hide CC and BCC fields by default
+        // Hide CC and BCC fields at start
         ccField.setVisibility(View.GONE);
         bccField.setVisibility(View.GONE);
     }
 
-    private void setupButtonListeners() {
-        // Set up click listeners for all buttons
-        sendButton.setOnClickListener(v -> handleSendEmailAction());
-        sendIconButton.setOnClickListener(v -> handleSendEmailAction());
-        exitButton.setOnClickListener(v -> closeComposeScreen());
-        attachButton.setOnClickListener(v -> handleAddAttachment());
-        settingsButton.setOnClickListener(v -> showSettingsMenu());
-        expandToButton.setOnClickListener(v -> toggleCcBccFields());
+    private void setupButtons() {
+        // Both send buttons do the same thing
+        sendButton.setOnClickListener(v -> sendEmail());
+        sendIconButton.setOnClickListener(v -> sendEmail());
+
+        // Other buttons
+        exitButton.setOnClickListener(v -> closeScreen());
+        attachButton.setOnClickListener(v -> showToast("Attachment feature coming soon!"));
+        settingsButton.setOnClickListener(v -> showSettings());
+        expandToButton.setOnClickListener(v -> toggleCcBcc());
     }
 
-    private void toggleCcBccFields() {
-        // Switch between showing and hiding CC/BCC fields
+    private void prefillFields() {
+        // Pre-fill the from field with user's email
+        fromField.setText("user@example.com");
+
+        // Check if we got email addresses to pre-fill
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("prefilled_to")) {
+            String emails = intent.getStringExtra("prefilled_to");
+            toField.setText(emails);
+        }
+    }
+
+    private void toggleCcBcc() {
+        // Show or hide CC and BCC fields
         areCcBccVisible = !areCcBccVisible;
 
         if (areCcBccVisible) {
-            // Show CC and BCC fields
             ccField.setVisibility(View.VISIBLE);
             bccField.setVisibility(View.VISIBLE);
             expandToButton.setImageResource(R.drawable.ic_arrow_drop_up);
         } else {
-            // Hide CC and BCC fields
             ccField.setVisibility(View.GONE);
             bccField.setVisibility(View.GONE);
             expandToButton.setImageResource(R.drawable.ic_arrow_drop_down);
         }
     }
 
-    private void handleAddAttachment() {
-        showMessage("Attachment feature will be added in the next update!");
-    }
+    private void showSettings() {
+        // Show the settings popup menu
+        PopupMenu menu = new PopupMenu(this, settingsButton);
+        menu.getMenuInflater().inflate(R.menu.compose_settings_menu, menu.getMenu());
 
-    private void showSettingsMenu() {
-        // Create and show the popup menu
-        PopupMenu settingsMenu = new PopupMenu(this, settingsButton);
-        settingsMenu.getMenuInflater().inflate(R.menu.compose_settings_menu, settingsMenu.getMenu());
-
-        settingsMenu.setOnMenuItemClickListener(item -> {
-            return handleSettingsMenuClick(item);
+        menu.setOnMenuItemClickListener(item -> {
+            handleMenuClick(item);
+            return true;
         });
 
-        settingsMenu.show();
+        menu.show();
     }
 
-    private boolean handleSettingsMenuClick(MenuItem menuItem) {
-        // Handle which menu item was clicked
-        int itemId = menuItem.getItemId();
+    private void handleMenuClick(MenuItem item) {
+        // Handle clicks from the settings menu
+        int id = item.getItemId();
 
-        if (itemId == R.id.menu_save_draft) {
-            saveEmailAsDraft();
-            return true;
-        } else if (itemId == R.id.menu_discard) {
+        if (id == R.id.menu_save_draft) {
+            saveDraft();
+        } else if (id == R.id.menu_discard) {
             discardEmail();
-            return true;
-        } else if (itemId == R.id.menu_settings) {
-            openSettingsScreen();
-            return true;
+        } else if (id == R.id.menu_settings) {
+            showToast("Settings coming soon!");
         }
-
-        return false;
     }
 
-    private void saveEmailAsDraft() {
-        // Check if there's any content to save
-        if (!hasAnyEmailContent()) {
-            showMessage("No content to save as draft");
-            return;
+    private void saveDraft() {
+        // Save the current email as a draft
+        if (hasContent()) {
+            showToast("Draft saved!");
+        } else {
+            showToast("No content to save");
         }
-
-        showMessage("Email saved as draft successfully");
-        // Here we would normally save to database or file
     }
 
     private void discardEmail() {
-        // Only show confirmation if there's content
-        if (hasAnyEmailContent()) {
-            showDiscardConfirmation();
+        // Discard the current email
+        if (hasContent()) {
+            showDiscardDialog();
         } else {
-            closeComposeScreen();
+            closeScreen();
         }
     }
 
-    private void showDiscardConfirmation() {
+    private void showDiscardDialog() {
+        // Ask user if they're sure they want to discard
         new android.app.AlertDialog.Builder(this)
                 .setTitle("Discard Email")
-                .setMessage("Are you sure you want to discard this email? Your changes will be lost.")
-                .setPositiveButton("Discard", (dialog, which) -> {
-                    closeComposeScreen();
-                })
+                .setMessage("Are you sure? Your changes will be lost.")
+                .setPositiveButton("Discard", (dialog, which) -> closeScreen())
                 .setNegativeButton("Keep Editing", null)
                 .show();
     }
 
-    private void openSettingsScreen() {
-        showMessage("App settings will be available soon!");
-    }
+    private void sendEmail() {
+        // Get all the email content
+        String from = fromField.getText().toString().trim();
+        String to = toField.getText().toString().trim();
+        String cc = ccField.getText().toString().trim();
+        String bcc = bccField.getText().toString().trim();
+        String subject = subjectField.getText().toString().trim();
+        String body = messageField.getText().toString().trim();
 
-    private void handleSendEmailAction() {
-        // Get all the email data from fields
-        EmailData currentEmail = collectEmailData();
-
-        // Validate the email before sending
-        if (!isEmailValid(currentEmail)) {
-            showMessage("Please fill in all required fields: From, To, Subject, and Message");
+        // Check if all required fields are filled
+        if (from.isEmpty() || to.isEmpty() || subject.isEmpty() || body.isEmpty()) {
+            showToast("Please fill all required fields");
             return;
         }
 
-        // Send the email
-        sendEmailToServer(currentEmail);
+        // Check if email addresses look right
+        if (!areEmailsValid(to)) {
+            showToast("Please check the email addresses in 'To' field");
+            return;
+        }
+
+        if (!cc.isEmpty() && !areEmailsValid(cc)) {
+            showToast("Please check the email addresses in 'CC' field");
+            return;
+        }
+
+        if (!bcc.isEmpty() && !areEmailsValid(bcc)) {
+            showToast("Please check the email addresses in 'BCC' field");
+            return;
+        }
+
+        // Show loading and send the email
+        setLoading(true);
+        sendEmailToServer(from, to, cc, bcc, subject, body);
     }
 
-    private EmailData collectEmailData() {
-        // Collect all the data from input fields
-        String fromAddress = fromField.getText().toString().trim();
-        String toAddress = toField.getText().toString().trim();
-        String ccAddress = ccField.getText().toString().trim();
-        String bccAddress = bccField.getText().toString().trim();
-        String emailSubject = subjectField.getText().toString().trim();
-        String emailBody = messageField.getText().toString().trim();
+    private boolean areEmailsValid(String emails) {
+        // Check if email addresses look correct
+        if (emails.isEmpty()) return true;
 
-        return new EmailData(fromAddress, toAddress, ccAddress, bccAddress, emailSubject, emailBody);
+        // Split by commas and check each email
+        String[] emailArray = emails.split(",");
+        for (String email : emailArray) {
+            String trimmedEmail = email.trim();
+            if (!isValidEmail(trimmedEmail)) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    private boolean isEmailValid(EmailData email) {
-        // Check if required fields are filled
-        boolean hasFrom = !email.fromAddress.isEmpty();
-        boolean hasTo = !email.toAddress.isEmpty();
-        boolean hasSubject = !email.subject.isEmpty();
-        boolean hasBody = !email.body.isEmpty();
-
-        return hasFrom && hasTo && hasSubject && hasBody;
+    private boolean isValidEmail(String email) {
+        // Simple check if email looks like an email address
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
-    private boolean hasAnyEmailContent() {
-        // Check if any field has content
-        EmailData email = collectEmailData();
+    private void sendEmailToServer(String from, String to, String cc, String bcc, String subject, String body) {
+        // Create email config and send the email
+        EmailConfig config = new EmailConfig(from, "your-app-password");
 
-        boolean hasFrom = !email.fromAddress.isEmpty();
-        boolean hasTo = !email.toAddress.isEmpty();
-        boolean hasCc = !email.ccAddress.isEmpty();
-        boolean hasBcc = !email.bccAddress.isEmpty();
-        boolean hasSubject = !email.subject.isEmpty();
-        boolean hasBody = !email.body.isEmpty();
+        // Combine all recipients
+        String allRecipients = to;
+        if (!cc.isEmpty()) {
+            allRecipients += "," + cc;
+        }
+        if (!bcc.isEmpty()) {
+            allRecipients += "," + bcc;
+        }
 
-        return hasFrom || hasTo || hasCc || hasBcc || hasSubject || hasBody;
-    }
+        // Count how many people we're sending to
+        int recipientCount = countRecipients(to, cc, bcc);
 
-    private void sendEmailToServer(EmailData email) {
-        // Show loading indicator
-        showLoading(true);
-
-        // Set up email configuration
-        EmailConfig emailConfig = new EmailConfig(email.fromAddress, "your-app-password-here");
-
-        // Send the email
-        EmailSender.sendEmail(emailConfig, email.toAddress, email.subject, email.body, new EmailSender.EmailSendListener() {
+        EmailSender.sendEmail(config, allRecipients, subject, body, new EmailSender.EmailSendListener() {
             @Override
             public void onSuccess() {
-                // Email sent successfully
                 runOnUiThread(() -> {
-                    showLoading(false);
-                    showMessage("Email sent successfully!");
-                    closeComposeScreen();
+                    setLoading(false);
+                    showToast("Email sent to " + recipientCount + " people!");
+                    closeScreen();
                 });
             }
 
             @Override
             public void onError(String error) {
-                // There was an error sending
                 runOnUiThread(() -> {
-                    showLoading(false);
-                    showMessage("Failed to send email: " + error);
+                    setLoading(false);
+                    showToast("Send failed: " + error);
                 });
             }
         });
     }
 
-    private void showLoading(boolean show) {
-        // Show or hide loading indicator
-        if (show) {
-            loadingBar.setVisibility(View.VISIBLE);
-        } else {
-            loadingBar.setVisibility(View.GONE);
+    private int countRecipients(String to, String cc, String bcc) {
+        // Count how many email addresses we have
+        int count = 0;
+
+        if (!to.isEmpty()) {
+            count += to.split(",").length;
+        }
+        if (!cc.isEmpty()) {
+            count += cc.split(",").length;
+        }
+        if (!bcc.isEmpty()) {
+            count += bcc.split(",").length;
         }
 
-        // Enable or disable buttons during loading
-        boolean buttonsEnabled = !show;
-        sendButton.setEnabled(buttonsEnabled);
-        sendIconButton.setEnabled(buttonsEnabled);
-        exitButton.setEnabled(buttonsEnabled);
-        attachButton.setEnabled(buttonsEnabled);
-        settingsButton.setEnabled(buttonsEnabled);
-        expandToButton.setEnabled(buttonsEnabled);
+        return count;
     }
 
-    private void closeComposeScreen() {
+    private boolean hasContent() {
+        // Check if any field has content
+        return !fromField.getText().toString().isEmpty() ||
+                !toField.getText().toString().isEmpty() ||
+                !ccField.getText().toString().isEmpty() ||
+                !bccField.getText().toString().isEmpty() ||
+                !subjectField.getText().toString().isEmpty() ||
+                !messageField.getText().toString().isEmpty();
+    }
+
+    private void setLoading(boolean loading) {
+        // Show or hide loading bar and enable/disable buttons
+        loadingBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+
+        // Disable buttons while loading
+        boolean enabled = !loading;
+        sendButton.setEnabled(enabled);
+        sendIconButton.setEnabled(enabled);
+        exitButton.setEnabled(enabled);
+        attachButton.setEnabled(enabled);
+        settingsButton.setEnabled(enabled);
+        expandToButton.setEnabled(enabled);
+    }
+
+    private void closeScreen() {
+        // Close this screen and go back
         finish();
     }
 
-    private void showMessage(String text) {
-        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
-    }
-
-    // Helper class to store email information
-    private static class EmailData {
-        final String fromAddress;
-        final String toAddress;
-        final String ccAddress;
-        final String bccAddress;
-        final String subject;
-        final String body;
-
-        EmailData(String from, String to, String cc, String bcc, String subject, String body) {
-            this.fromAddress = from;
-            this.toAddress = to;
-            this.ccAddress = cc;
-            this.bccAddress = bcc;
-            this.subject = subject;
-            this.body = body;
-        }
+    private void showToast(String message) {
+        // Show a short toast message
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

@@ -2,19 +2,21 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="#F9F3FF">
 
     <!-- Main Content ScrollView -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#FFFFFF">
+        android:background="#F9F3FF">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:background="#F9F3FF">
 
+            <!-- Purple Header Section - This stays purple -->
             <LinearLayout
                 android:id="@+id/rhfq7qa194pc"
                 android:layout_width="match_parent"
@@ -86,13 +88,12 @@
                     android:text="Inbox" />
             </LinearLayout>
 
-            <!-- Email List Container -->
+            <!-- Email List Container - WHITE for mail content -->
             <LinearLayout
                 android:id="@+id/emailListContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#F9F3FF"
-                android:paddingBottom="39dp"
+                android:background="#FFFFFF"
                 android:orientation="vertical" />
 
         </LinearLayout>

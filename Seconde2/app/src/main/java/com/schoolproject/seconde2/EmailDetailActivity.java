@@ -1,170 +1,232 @@
 package com.schoolproject.seconde2;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.PopupMenu;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 public class EmailDetailActivity extends AppCompatActivity {
 
-    // Text views for displaying email information
+    // Default values in case we don't get any email data
+    private static final String DEFAULT_SENDER = "Unknown Sender";
+    private static final String DEFAULT_SUBJECT = "No Subject";
+    private static final String DEFAULT_DATE = "Date not available";
+    private static final String DEFAULT_RECIPIENT = "user@example.com";
+    private static final String DEFAULT_BODY = "No content available";
+
+    // IDs for the content menu items
+    private static final int MENU_CONTENT_REPLY = 1;
+    private static final int MENU_CONTENT_FORWARD = 2;
+    private static final int MENU_CONTENT_ARCHIVE = 3;
+    private static final int MENU_CONTENT_SPAM = 4;
+
     private TextView senderTextView, subjectTextView, dateTextView, recipientTextView, bodyTextView;
-
-    // Buttons for navigation and actions
-    private ImageButton backButton;
-    private LinearLayout replyButton, forwardButton;
-
-    // Variables to store email data
-    private String emailSender, emailSubject, emailDate, emailRecipient, emailBody;
+    private ImageButton backButton, replyButton, shareButton, menuButton, contentMenuButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_email_detail);
 
-        // Set up the activity
-        initializeViews();
-        setupButtonListeners();
-        loadEmailDataFromIntent();
+        // Set up all the views and load the email data
+        setupViews();
+        setupClickListeners();
+        loadEmailData();
     }
 
-    // Find all the views in the layout
-    private void initializeViews() {
-        // Text views for email details
+    private void setupViews() {
+        // Find all the text views for displaying email info
         senderTextView = findViewById(R.id.txtSender);
         subjectTextView = findViewById(R.id.txtSubject);
         dateTextView = findViewById(R.id.txtDate);
         recipientTextView = findViewById(R.id.txtTo);
         bodyTextView = findViewById(R.id.txtBody);
 
-        // Action buttons
+        // Find all the buttons
         backButton = findViewById(R.id.btnBack);
-        replyButton = findViewById(R.id.btnReply);
-        forwardButton = findViewById(R.id.btnForward);
+        replyButton = findViewById(R.id.btnToolbarReply);
+        shareButton = findViewById(R.id.btnShare);
+        menuButton = findViewById(R.id.btnMenu);
+        contentMenuButton = findViewById(R.id.btnContentMenu);
     }
 
-    // Set up click listeners for all buttons
-    private void setupButtonListeners() {
-        // Back button - returns to previous screen
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                goBackToEmailList();
+    private void setupClickListeners() {
+        // Back button closes this screen
+        backButton.setOnClickListener(v -> finish());
+
+        // Reply button opens reply screen
+        replyButton.setOnClickListener(v -> openReplyScreen());
+
+        // Share button (not implemented yet)
+        shareButton.setOnClickListener(v -> showToast("Share email"));
+
+        // Menu buttons show options
+        menuButton.setOnClickListener(v -> showOptionsMenu(v));
+        contentMenuButton.setOnClickListener(v -> showContentOptionsMenu(v));
+    }
+
+    private void showOptionsMenu(View view) {
+        // Show the main options menu
+        PopupMenu popupMenu = new PopupMenu(this, view);
+        popupMenu.getMenuInflater().inflate(R.menu.email_detail_menu, popupMenu.getMenu());
+
+        // Make the menu items look nice
+        customizeMenuItems(popupMenu.getMenu());
+        forceMenuIconsToShow(popupMenu);
+        setupMenuClickListeners(popupMenu);
+
+        popupMenu.show();
+    }
+
+    private void showContentOptionsMenu(View view) {
+        // Show the content options menu (the one in the email body area)
+        PopupMenu popupMenu = new PopupMenu(this, view);
+        Menu menu = popupMenu.getMenu();
+
+        // Add menu items with icons
+        menu.add(0, MENU_CONTENT_REPLY, 0, "  Reply").setIcon(R.drawable.ic_reply);
+        menu.add(0, MENU_CONTENT_FORWARD, 1, "  Forward").setIcon(R.drawable.ic_forward);
+        menu.add(0, MENU_CONTENT_ARCHIVE, 2, "  Archive").setIcon(R.drawable.ic_archive);
+
+        // Make the spam item red
+        MenuItem spamItem = menu.add(0, MENU_CONTENT_SPAM, 3, "  Report spam");
+        spamItem.setIcon(R.drawable.ic_warning);
+        SpannableString redTitle = new SpannableString("  Report spam");
+        redTitle.setSpan(new ForegroundColorSpan(Color.RED), 0, redTitle.length(), 0);
+        spamItem.setTitle(redTitle);
+
+        forceMenuIconsToShow(popupMenu);
+        setupContentMenuClickListeners(popupMenu);
+
+        popupMenu.show();
+    }
+
+    private void customizeMenuItems(Menu menu) {
+        // Add spacing and color to menu items
+        for (int i = 0; i < menu.size(); i++) {
+            MenuItem item = menu.getItem(i);
+            String spacedTitle = "  " + item.getTitle();
+
+            // Make the spam item red
+            if (i == 3) {
+                SpannableString redTitle = new SpannableString(spacedTitle);
+                redTitle.setSpan(new ForegroundColorSpan(Color.RED), 0, redTitle.length(), 0);
+                item.setTitle(redTitle);
+            } else {
+                item.setTitle(spacedTitle);
             }
-        });
+        }
+    }
 
-        // Reply button - opens reply fragment
-        replyButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openReplyFragment();
+    private void forceMenuIconsToShow(PopupMenu popupMenu) {
+        // This makes sure the menu icons actually show up
+        try {
+            Field field = popupMenu.getClass().getDeclaredField("mPopup");
+            field.setAccessible(true);
+            Object menuPopupHelper = field.get(popupMenu);
+            Class<?> classPopupHelper = menuPopupHelper.getClass();
+            Method setForceShowIcon = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
+            setForceShowIcon.invoke(menuPopupHelper, true);
+        } catch (Exception e) {
+            // If it fails, the menu will still work but might not show icons
+        }
+    }
+
+    private void setupMenuClickListeners(PopupMenu popupMenu) {
+        popupMenu.setOnMenuItemClickListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.menu_archive) {
+                showToast("Email archived");
+            } else if (itemId == R.id.menu_trash) {
+                showToast("Email moved to trash");
+            } else if (itemId == R.id.menu_unread) {
+                showToast("Email marked as unread");
+            } else if (itemId == R.id.menu_spam) {
+                showToast("Email reported as spam");
             }
+            return true;
         });
+    }
 
-        // Forward button - opens forward fragment
-        forwardButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openForwardFragment();
+    private void setupContentMenuClickListeners(PopupMenu popupMenu) {
+        popupMenu.setOnMenuItemClickListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == MENU_CONTENT_REPLY) {
+                openReplyScreen();
+            } else if (itemId == MENU_CONTENT_FORWARD) {
+                openForwardScreen();
+            } else if (itemId == MENU_CONTENT_ARCHIVE) {
+                showToast("Email archived");
+            } else if (itemId == MENU_CONTENT_SPAM) {
+                showToast("Email reported as spam");
             }
+            return true;
         });
-
     }
 
-    // Get email data from the intent that started this activity
-    private void loadEmailDataFromIntent() {
-        Intent incomingIntent = getIntent();
+    private void loadEmailData() {
+        // Get the email data that was passed to us
+        Intent intent = getIntent();
+        if (intent == null) return;
 
-        if (incomingIntent != null) {
-            // Extract all the email data from intent extras
-            emailSender = incomingIntent.getStringExtra("sender");
-            emailSubject = incomingIntent.getStringExtra("subject");
-            emailDate = incomingIntent.getStringExtra("date");
-            emailRecipient = incomingIntent.getStringExtra("to");
-            emailBody = incomingIntent.getStringExtra("body");
-
-            // Display the data in the text views
-            displayEmailData();
-        }
+        // Set all the email information to the text views
+        senderTextView.setText(getStringExtra(intent, "sender", DEFAULT_SENDER));
+        subjectTextView.setText(getStringExtra(intent, "subject", DEFAULT_SUBJECT));
+        dateTextView.setText(getStringExtra(intent, "date", DEFAULT_DATE));
+        recipientTextView.setText(getStringExtra(intent, "to", DEFAULT_RECIPIENT));
+        bodyTextView.setText(getStringExtra(intent, "body", DEFAULT_BODY));
     }
 
-    // Display the email data in the text views
-    private void displayEmailData() {
-        // Set sender name
-        if (emailSender != null) {
-            senderTextView.setText(emailSender);
-        } else {
-            senderTextView.setText("Unknown Sender");
-        }
-
-        // Set email subject
-        if (emailSubject != null) {
-            subjectTextView.setText(emailSubject);
-        } else {
-            subjectTextView.setText("No Subject");
-        }
-
-        // Set date
-        if (emailDate != null) {
-            dateTextView.setText(emailDate);
-        } else {
-            dateTextView.setText("Date not available");
-        }
-
-        // Set recipient (if available)
-        if (emailRecipient != null) {
-            recipientTextView.setText(emailRecipient);
-        } else {
-            recipientTextView.setText("user@example.com"); // Default recipient
-        }
-
-        // Set email body
-        if (emailBody != null) {
-            bodyTextView.setText(emailBody);
-        } else {
-            bodyTextView.setText("No content available");
-        }
+    private String getStringExtra(Intent intent, String key, String defaultValue) {
+        // Helper method to get string from intent with a default value
+        String value = intent.getStringExtra(key);
+        return value != null ? value : defaultValue;
     }
 
-    // Open the reply fragment with current email data
-    private void openReplyFragment() {
-        Fragment replyFragment = ReplyFragment.newInstance(emailSender, emailSubject, emailDate, emailBody);
-        displayFragment(replyFragment);
+    private void openReplyScreen() {
+        // Open the reply screen with the current email data
+        Fragment replyFragment = ReplyFragment.newInstance(
+                getIntent().getStringExtra("sender"),
+                getIntent().getStringExtra("subject"),
+                getIntent().getStringExtra("date"),
+                getIntent().getStringExtra("body")
+        );
+        getSupportFragmentManager().beginTransaction()
+                .replace(android.R.id.content, replyFragment)
+                .addToBackStack(null)
+                .commit();
     }
 
-    // Open the forward fragment with current email data
-    private void openForwardFragment() {
-        Fragment forwardFragment = ForwardFragment.newInstance(emailSender, emailSubject, emailDate, emailBody);
-        displayFragment(forwardFragment);
+    private void openForwardScreen() {
+        // Open the forward screen with the current email data
+        Fragment forwardFragment = ForwardFragment.newInstance(
+                getIntent().getStringExtra("sender"),
+                getIntent().getStringExtra("subject"),
+                getIntent().getStringExtra("date"),
+                getIntent().getStringExtra("body")
+        );
+        getSupportFragmentManager().beginTransaction()
+                .replace(android.R.id.content, forwardFragment)
+                .addToBackStack(null)
+                .commit();
     }
 
-    // Helper method to display any fragment
-    private void displayFragment(Fragment fragment) {
-        // Get the fragment manager
-        FragmentManager fragmentManager = getSupportFragmentManager();
-
-        // Start a fragment transaction
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-
-        // Replace whatever is in the fragment container with new fragment
-        transaction.replace(android.R.id.content, fragment);
-
-        // Add to back stack so user can go back
-        transaction.addToBackStack(null);
-
-        // Commit the transaction
-        transaction.commit();
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
-
-    // Close this activity and return to email list
-    private void goBackToEmailList() {
-        finish();
-    }
-
 }

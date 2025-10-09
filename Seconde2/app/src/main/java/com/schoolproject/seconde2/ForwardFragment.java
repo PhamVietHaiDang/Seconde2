@@ -12,24 +12,24 @@ import androidx.fragment.app.Fragment;
 
 public class ForwardFragment extends Fragment {
 
-    // UI components
-    private EditText editFrom, editTo, editSubject, editMessage;
-    private ImageButton btnBack, btnSend;
+    // All the input fields and buttons
+    private EditText fromField, toField, subjectField, messageField;
+    private ImageButton backButton, sendButton;
     private TextView toolbarTitle;
-    private TextView txtOriginalSender, txtOriginalSubject, txtOriginalDate, txtOriginalBody;
+    private TextView originalSenderText, originalSubjectText, originalDateText, originalBodyText;
     private ImageView iconType;
 
-    // Original email data - maybe I should use a model class for this later
+    // Store the original email data
     private String originalSender;
     private String originalSubject;
     private String originalDate;
     private String originalBody;
 
     public ForwardFragment() {
-        // Required empty public constructor
+        // Empty constructor needed for fragments
     }
 
-    // Factory method to create new instance with email data
+    // Create a new forward fragment with email data
     public static ForwardFragment newInstance(String sender, String subject, String date, String body) {
         ForwardFragment fragment = new ForwardFragment();
         Bundle args = new Bundle();
@@ -47,48 +47,49 @@ public class ForwardFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_reply_forward, container, false);
 
-        // Initialize all the views
-        initViews(view);
+        // Set up all the views
+        setupViews(view);
 
-        // Set up click listeners
+        // Set up button click listeners
         setupClickListeners();
 
-        // Load the original email content
+        // Load the original email we're forwarding
         loadOriginalEmail();
 
-        // Configure for forward mode
+        // Set up everything for forwarding mode
         setupForwardMode();
 
         return view;
     }
 
-    private void initViews(View view) {
-        // Find all the views by ID
-        editFrom = view.findViewById(R.id.editFrom);
-        editTo = view.findViewById(R.id.editTo);
-        editSubject = view.findViewById(R.id.editSubject);
-        editMessage = view.findViewById(R.id.editMessage);
+    private void setupViews(View view) {
+        // Find all the input fields
+        fromField = view.findViewById(R.id.editFrom);
+        toField = view.findViewById(R.id.editTo);
+        subjectField = view.findViewById(R.id.editSubject);
+        messageField = view.findViewById(R.id.editMessage);
 
-        btnBack = view.findViewById(R.id.btnBack);
-        btnSend = view.findViewById(R.id.btnSend);
+        // Find all the buttons
+        backButton = view.findViewById(R.id.btnBack);
+        sendButton = view.findViewById(R.id.btnSend);
 
+        // Find the toolbar title
         toolbarTitle = view.findViewById(R.id.toolbarTitle);
 
-        // Original email display views
-        txtOriginalSender = view.findViewById(R.id.txtOriginalSender);
-        txtOriginalSubject = view.findViewById(R.id.txtOriginalSubject);
-        txtOriginalDate = view.findViewById(R.id.txtOriginalDate);
-        txtOriginalBody = view.findViewById(R.id.txtOriginalBody);
+        // Find the views that show the original email
+        originalSenderText = view.findViewById(R.id.txtOriginalSender);
+        originalSubjectText = view.findViewById(R.id.txtOriginalSubject);
+        originalDateText = view.findViewById(R.id.txtOriginalDate);
+        originalBodyText = view.findViewById(R.id.txtOriginalBody);
 
+        // Find the icon and set it to forward icon
         iconType = view.findViewById(R.id.iconType);
-
-        // Set the forward icon
         iconType.setImageResource(R.drawable.ic_forward);
     }
 
     private void setupClickListeners() {
-        // Back button handling
-        btnBack.setOnClickListener(new View.OnClickListener() {
+        // Back button goes back to previous screen
+        backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (getActivity() != null) {
@@ -97,17 +98,17 @@ public class ForwardFragment extends Fragment {
             }
         });
 
-        // Send button handling
-        btnSend.setOnClickListener(new View.OnClickListener() {
+        // Send button sends the forwarded email
+        sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendForward();
+                sendForwardedEmail();
             }
         });
     }
 
     private void loadOriginalEmail() {
-        // Get the arguments passed to this fragment
+        // Get the email data that was passed to us
         Bundle arguments = getArguments();
         if (arguments != null) {
             originalSender = arguments.getString("sender");
@@ -115,24 +116,24 @@ public class ForwardFragment extends Fragment {
             originalDate = arguments.getString("date");
             originalBody = arguments.getString("body");
 
-            // Display original email info
-            if (txtOriginalSender != null) {
-                txtOriginalSender.setText(originalSender);
+            // Show the original email information
+            if (originalSenderText != null) {
+                originalSenderText.setText(originalSender);
             }
-            if (txtOriginalSubject != null) {
-                txtOriginalSubject.setText(originalSubject);
+            if (originalSubjectText != null) {
+                originalSubjectText.setText(originalSubject);
             }
-            if (txtOriginalDate != null) {
-                txtOriginalDate.setText(originalDate);
+            if (originalDateText != null) {
+                originalDateText.setText(originalDate);
             }
-            if (txtOriginalBody != null) {
-                txtOriginalBody.setText(originalBody);
+            if (originalBodyText != null) {
+                originalBodyText.setText(originalBody);
             }
         }
     }
 
     private void setupForwardMode() {
-        // Set the toolbar title
+        // Set the toolbar title to "Forward"
         if (toolbarTitle != null) {
             toolbarTitle.setText("Forward");
         }
@@ -140,10 +141,10 @@ public class ForwardFragment extends Fragment {
         // Pre-fill the subject with "Fwd: " prefix
         if (originalSubject != null && !originalSubject.isEmpty()) {
             String forwardSubject = "Fwd: " + originalSubject;
-            editSubject.setText(forwardSubject);
+            subjectField.setText(forwardSubject);
         }
 
-        // Create the forwarded message body with original email content
+        // Create the forwarded message with original email content
         if (originalBody != null && !originalBody.isEmpty()) {
             StringBuilder forwardedMessage = new StringBuilder();
             forwardedMessage.append("\n\n");
@@ -154,36 +155,35 @@ public class ForwardFragment extends Fragment {
             forwardedMessage.append("\n");
             forwardedMessage.append(originalBody);
 
-            editMessage.setText(forwardedMessage.toString());
+            messageField.setText(forwardedMessage.toString());
         }
     }
 
-    private void sendForward() {
-        // Get the input values
-        String fromEmail = editFrom.getText().toString().trim();
-        String toEmail = editTo.getText().toString().trim();
-        String subjectText = editSubject.getText().toString().trim();
-        String messageText = editMessage.getText().toString().trim();
+    private void sendForwardedEmail() {
+        // Get all the input values
+        String fromEmail = fromField.getText().toString().trim();
+        String toEmail = toField.getText().toString().trim();
+        String subjectText = subjectField.getText().toString().trim();
+        String messageText = messageField.getText().toString().trim();
 
-        // Basic validation - TODO: maybe add better validation later
+        // Check if all required fields are filled
         if (fromEmail.isEmpty() || toEmail.isEmpty() || subjectText.isEmpty() || messageText.isEmpty()) {
-            // Show error message - need to implement toast or dialog
+            // TODO: Show error message to user
             return;
         }
 
-        // TODO: Implement actual email sending logic
-        // For now just using the EmailSender class
-        EmailConfig config = new EmailConfig(fromEmail, "your-app-password"); // Note: should use proper auth
+        // Send the email using our EmailSender class
+        EmailConfig config = new EmailConfig(fromEmail, "your-app-password");
 
         EmailSender.sendEmail(config, toEmail, subjectText, messageText, new EmailSender.EmailSendListener() {
             @Override
             public void onSuccess() {
-                // Handle success on UI thread
+                // Email sent successfully
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            // Show success message - TODO: implement toast
+                            // TODO: Show success message
                             // Go back to previous screen
                             getActivity().onBackPressed();
                         }
@@ -193,12 +193,12 @@ public class ForwardFragment extends Fragment {
 
             @Override
             public void onError(String errorMessage) {
-                // Handle error on UI thread
+                // There was an error sending the email
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            // Show error message - TODO: implement error dialog
+                            // TODO: Show error message to user
                         }
                     });
                 }

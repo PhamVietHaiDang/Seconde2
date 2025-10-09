@@ -12,55 +12,53 @@ import androidx.fragment.app.Fragment;
 
 public class MainActivity extends AppCompatActivity {
 
-    // Declare variables for our views
-    private DrawerLayout mainDrawer;
+    // Our main views
+    private DrawerLayout drawerLayout;
     private ImageView menuButton;
     private LinearLayout composeButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Set the layout for this activity
         setContentView(R.layout.activity_main);
 
-        // Initialize all our views
+        // Set up all our views
         setupViews();
 
-        // Set up all click listeners
+        // Set up button click listeners
         setupClickListeners();
 
-        // Show the inbox by default when app starts
+        // Show inbox when app starts
         showInboxContent();
     }
 
-    // Method to find and assign all our views
+    // Find all the views we need
     private void setupViews() {
-        mainDrawer = findViewById(R.id.drawer_layout);
+        drawerLayout = findViewById(R.id.drawer_layout);
         menuButton = findViewById(R.id.rblhycly8y27);
         composeButton = findViewById(R.id.rp4smgichsuc);
     }
 
     // Set up all the button clicks
     private void setupClickListeners() {
-        // Menu button to open drawer
+        // Menu button opens the navigation drawer
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mainDrawer.openDrawer(findViewById(R.id.nav_custom));
+                drawerLayout.openDrawer(findViewById(R.id.nav_custom));
             }
         });
 
-        // Compose button to write new email
+        // Compose button opens compose email screen
         composeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Go to compose email screen
                 Intent composeIntent = new Intent(MainActivity.this, ComposeEmailActivity.class);
                 startActivity(composeIntent);
             }
         });
 
-        // Set up navigation menu items
+        // Set up navigation menu clicks
         setupNavigationClicks();
 
         // Set up email item clicks
@@ -73,8 +71,8 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.nav_inbox).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showInboxContent();
-                mainDrawer.closeDrawer(findViewById(R.id.nav_custom));
+                showFragment(new InboxFragment());
+                closeNavigationDrawer();
                 Toast.makeText(MainActivity.this, "Showing Inbox", Toast.LENGTH_SHORT).show();
             }
         });
@@ -137,15 +135,15 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.nav_settings).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                showFragment(new SettingsFragment());
                 closeNavigationDrawer();
-                Toast.makeText(MainActivity.this, "Settings - Coming soon!", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     // Close the navigation drawer
     private void closeNavigationDrawer() {
-        mainDrawer.closeDrawer(findViewById(R.id.nav_custom));
+        drawerLayout.closeDrawer(findViewById(R.id.nav_custom));
     }
 
     // Handle clicks on email list items
@@ -193,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // Method to show a fragment
+    // Show a fragment in the main content area
     private void showFragment(Fragment fragment) {
         try {
             // Hide the main inbox content
@@ -202,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
                 inboxContent.setVisibility(View.GONE);
             }
 
-            // Show the fragment in the main content area
+            // Show the fragment
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.main_content, fragment)
                     .commit();
@@ -217,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Show the default inbox content
+    // Show the default inbox content (when app starts)
     private void showInboxContent() {
         // Show the main inbox layout
         View inboxContent = findViewById(R.id.main_inbox_content);
@@ -232,30 +230,29 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Open email detail activity
+    // Open email detail screen
     private void openEmailDetail(String sender, String subject, String date, String to, String body) {
         Intent emailDetailIntent = new Intent(this, EmailDetailActivity.class);
 
-        // Put all the email data into the intent
+        // Pass all the email data to the detail screen
         emailDetailIntent.putExtra("sender", sender);
         emailDetailIntent.putExtra("subject", subject);
         emailDetailIntent.putExtra("date", date);
         emailDetailIntent.putExtra("to", to);
         emailDetailIntent.putExtra("body", body);
 
-        // Start the activity
         startActivity(emailDetailIntent);
     }
 
-    // Helper method to show toast messages
+    // Show a toast message
     private void showToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
-    // ADD THIS MISSING METHOD - This is called from EmailListFragment
+    // This method is called from EmailListFragment to open the navigation drawer
     public void openNavigationDrawer() {
-        if (mainDrawer != null) {
-            mainDrawer.openDrawer(findViewById(R.id.nav_custom));
+        if (drawerLayout != null) {
+            drawerLayout.openDrawer(findViewById(R.id.nav_custom));
         }
     }
 }

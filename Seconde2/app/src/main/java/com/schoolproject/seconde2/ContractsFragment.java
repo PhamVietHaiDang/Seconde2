@@ -10,19 +10,19 @@ public class ContractsFragment extends EmailListFragment {
     protected void loadEmailData() {
         setFolderTitle("Contracts");
 
-        // Load all our company contracts
+        // Load all the company contracts we have
         loadAllContracts();
     }
 
     private void loadAllContracts() {
-        // Add contracts from different companies
+        // Add contracts from different companies we work with
         addMicrosoftContract();
         addGoogleContract();
         addAmazonContract();
         addSlackContract();
         addAdobeContract();
 
-        // We could add more contracts here later
+        // We can add more contracts here when we get new ones
     }
 
     private void addMicrosoftContract() {
@@ -100,15 +100,14 @@ public class ContractsFragment extends EmailListFragment {
         );
     }
 
-
     private void openContractDetails(String companyName) {
-        // Create an intent to open the contract detail screen
+        // Open the contract detail screen for this company
         Intent contractIntent = new Intent(getActivity(), ContractDetailActivity.class);
 
-        // Pass the company name to the detail screen
+        // Tell the detail screen which company we're looking at
         contractIntent.putExtra("company_name", companyName);
 
+        // Start the detail activity
         startActivity(contractIntent);
     }
-
 }

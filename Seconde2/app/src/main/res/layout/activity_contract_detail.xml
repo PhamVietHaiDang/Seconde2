@@ -10,12 +10,13 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Purple Header -->
+        <!-- Purple Header with 3-dots menu -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="150dp"
             android:background="#ECD6FF">
 
+            <!-- Back Button -->
             <ImageButton
                 android:id="@+id/btnBack"
                 android:layout_width="40dp"
@@ -26,6 +27,18 @@
                 android:src="@drawable/ic_close"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="Back" />
+
+            <!-- 3-dots menu button at top right -->
+            <ImageButton
+                android:id="@+id/btnContractMenu"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                android:src="@drawable/ic_more_vert"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Contract options" />
 
         </RelativeLayout>
 
@@ -40,7 +53,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center_horizontal"
-                android:paddingTop="80dp"> <!-- Space for the overlapping profile picture -->
+                android:paddingTop="80dp">
 
                 <!-- Contact Info Container -->
                 <LinearLayout

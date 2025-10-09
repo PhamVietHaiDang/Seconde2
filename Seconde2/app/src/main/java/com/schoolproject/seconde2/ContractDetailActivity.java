@@ -1,84 +1,70 @@
 package com.schoolproject.seconde2;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
 public class ContractDetailActivity extends AppCompatActivity {
 
-    // UI elements
-    private ImageButton backButton;
-    private ImageView contactAvatar;
-    private TextView phoneNumberText, emailAddressText, contactNameText, companyNameText;
+    // IDs for our menu items
+    private static final int MENU_ADD_DETAILS = 1;
+    private static final int MENU_FAVORITE = 2;
+    private static final int MENU_COPY_DETAILS = 3;
+    private static final int MENU_COMPOSE_EMAIL = 4;
+
+    private ImageButton backButton, menuButton;
+    private TextView phoneNumberText, emailAddressText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contract_detail);
 
+        // Set up all our views and data
         setupViews();
-        loadContactInformation();
-        setupEventListeners();
+        loadContactData();
+        setupClickListeners();
     }
 
     private void setupViews() {
-        // Find all the views we need
+        // Find all the buttons and text views
         backButton = findViewById(R.id.btnBack);
-        contactAvatar = findViewById(R.id.imgAvatar);
+        menuButton = findViewById(R.id.btnContractMenu);
         phoneNumberText = findViewById(R.id.txtPhone);
         emailAddressText = findViewById(R.id.txtEmail);
-
     }
 
-    private void loadContactInformation() {
-        // Set up sample contact data for demonstration
-        setupSampleContactData();
+    private void loadContactData() {
+        // Set some sample data for testing
+        setupSampleData();
 
-        // Check if we received any data from the previous screen
-        checkForIntentData();
+        // Check if we got real data from previous screen
+        checkForPassedData();
     }
 
-    private void setupSampleContactData() {
-        // For now, we're using sample data
-        // In a real app, this would come from a database or API
-
+    private void setupSampleData() {
         phoneNumberText.setText("+1 (555) 123-4567");
         emailAddressText.setText("contact@company.com");
-
-        // Set sample name and company if those fields exist
-        if (contactNameText != null) {
-            contactNameText.setText("John Smith");
-        }
-
-        if (companyNameText != null) {
-            companyNameText.setText("Tech Solutions Inc.");
-        }
-
-        // You could also set a sample avatar here
-        // contactAvatar.setImageResource(R.drawable.default_avatar);
     }
 
-    private void checkForIntentData() {
-        // Check if we got any data from the previous screen
-        /*
+    private void checkForPassedData() {
+        // See if the previous screen sent us any contact data
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            String companyName = extras.getString("company_name");
-            String contactName = extras.getString("contact_name");
             String phone = extras.getString("phone_number");
             String email = extras.getString("email_address");
 
-            // Use the real data if available
-            if (companyName != null) {
-                companyNameText.setText(companyName);
-            }
-            if (contactName != null) {
-                contactNameText.setText(contactName);
-            }
+            // Use the real data if we have it
             if (phone != null) {
                 phoneNumberText.setText(phone);
             }
@@ -86,74 +72,116 @@ public class ContractDetailActivity extends AppCompatActivity {
                 emailAddressText.setText(email);
             }
         }
-        */
     }
 
-    private void setupEventListeners() {
-        // Back button to return to previous screen
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                goBackToPreviousScreen();
-            }
-        });
+    private void setupClickListeners() {
+        // Back button goes to previous screen
+        backButton.setOnClickListener(view -> finish());
 
-        // Phone number - make it clickable to call
-        phoneNumberText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                handlePhoneNumberClick();
-            }
-        });
+        // Click phone number to call
+        phoneNumberText.setOnClickListener(view -> handlePhoneClick());
 
-        // Email address - make it clickable to send email
-        emailAddressText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                handleEmailAddressClick();
-            }
-        });
+        // Click email to send email
+        emailAddressText.setOnClickListener(view -> handleEmailClick());
 
-        // Avatar image - could be made clickable for larger view
-        contactAvatar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showToast("View contact photo");
-                // TODO: Open full screen avatar view later
+        // Menu button shows options
+        menuButton.setOnClickListener(view -> showContactMenu(view));
+    }
+
+    private void showContactMenu(View view) {
+        // Create the popup menu
+        PopupMenu popupMenu = new PopupMenu(this, view);
+        Menu menu = popupMenu.getMenu();
+
+        // Add all the menu options with icons
+        menu.add(0, MENU_ADD_DETAILS, 0, "  Add details").setIcon(R.drawable.ic_add);
+        menu.add(0, MENU_FAVORITE, 1, "  Mark as favorite").setIcon(R.drawable.ic_favorite);
+        menu.add(0, MENU_COPY_DETAILS, 2, "  Copy details").setIcon(R.drawable.ic_copy);
+        menu.add(0, MENU_COMPOSE_EMAIL, 3, "  Compose email").setIcon(R.drawable.ic_compose);
+
+        // Make sure icons show up
+        forceMenuIconsToShow(popupMenu);
+
+        // Handle menu item clicks
+        setupMenuClickListeners(popupMenu);
+
+        popupMenu.show();
+    }
+
+    private void forceMenuIconsToShow(PopupMenu popupMenu) {
+        // This is a hack to make sure menu icons show up
+        try {
+            Field field = popupMenu.getClass().getDeclaredField("mPopup");
+            field.setAccessible(true);
+            Object menuPopupHelper = field.get(popupMenu);
+            Class<?> classPopupHelper = menuPopupHelper.getClass();
+            Method setForceShowIcon = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
+            setForceShowIcon.invoke(menuPopupHelper, true);
+        } catch (Exception e) {
+            // If it fails, the menu will still work but might not show icons
+        }
+    }
+
+    private void setupMenuClickListeners(PopupMenu popupMenu) {
+        popupMenu.setOnMenuItemClickListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == MENU_ADD_DETAILS) {
+                addContactDetails();
+            } else if (itemId == MENU_FAVORITE) {
+                markAsFavorite();
+            } else if (itemId == MENU_COPY_DETAILS) {
+                copyContactDetails();
+            } else if (itemId == MENU_COMPOSE_EMAIL) {
+                composeEmail();
             }
+            return true;
         });
     }
 
-    private void goBackToPreviousScreen() {
-        // Close this activity and go back to the previous one
-        finish();
+    private void addContactDetails() {
+        Toast.makeText(this, "Add contact details", Toast.LENGTH_SHORT).show();
+        // TODO: Add logic for adding more contact info
     }
 
-    private void handlePhoneNumberClick() {
+    private void markAsFavorite() {
+        Toast.makeText(this, "Contact marked as favorite", Toast.LENGTH_SHORT).show();
+        // TODO: Add favorite functionality
+    }
+
+    private void copyContactDetails() {
+        // Get the contact info as text
+        String contactInfo = "Phone: " + phoneNumberText.getText() + "\nEmail: " + emailAddressText.getText();
+
+        // Copy to clipboard
+        android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        android.content.ClipData clip = android.content.ClipData.newPlainText("Contact details", contactInfo);
+        clipboard.setPrimaryClip(clip);
+
+        Toast.makeText(this, "Contact details copied to clipboard", Toast.LENGTH_SHORT).show();
+    }
+
+    private void composeEmail() {
+        String email = emailAddressText.getText().toString();
+
+        // Open the compose email screen
+        Intent composeIntent = new Intent(this, ComposeEmailActivity.class);
+
+        // Pre-fill the email address
+        composeIntent.putExtra("prefilled_to", email);
+
+        startActivity(composeIntent);
+    }
+
+    private void handlePhoneClick() {
         String phoneNumber = phoneNumberText.getText().toString();
-        showToast("Calling: " + phoneNumber);
-
-        // TODO: Implement actual phone call functionality later
-        /*
-        Intent callIntent = new Intent(Intent.ACTION_DIAL);
-        callIntent.setData(Uri.parse("tel:" + phoneNumber));
-        startActivity(callIntent);
-        */
+        Toast.makeText(this, "Calling: " + phoneNumber, Toast.LENGTH_SHORT).show();
+        // TODO: Add actual phone call functionality
     }
 
-    private void handleEmailAddressClick() {
+    private void handleEmailClick() {
         String emailAddress = emailAddressText.getText().toString();
-        showToast("Sending email to: " + emailAddress);
-
-        // TODO: Implement actual email functionality later
-        /*
-        Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-        emailIntent.setData(Uri.parse("mailto:" + emailAddress));
-        startActivity(emailIntent);
-        */
-    }
-
-    private void showToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Sending email to: " + emailAddress, Toast.LENGTH_SHORT).show();
+        // TODO: Add actual email functionality
     }
 }
