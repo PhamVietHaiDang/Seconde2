@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_content_reply"
+        android:icon="@drawable/ic_reply"
+        android:title="Reply" />
+    <item
+        android:id="@+id/menu_content_forward"
+        android:icon="@drawable/ic_forward"
+        android:title="Forward" />
+    <item
+        android:id="@+id/menu_content_archive"
+        android:icon="@drawable/ic_archive"
+        android:title="Archive" />
+    <item
+        android:id="@+id/menu_content_spam"
+        android:icon="@drawable/ic_warning"
+        android:title="Report spam" />
+</menu>

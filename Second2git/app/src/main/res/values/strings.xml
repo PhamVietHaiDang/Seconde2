@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Seconde</string>
+    <string name="search_in_mail">Search in mail</string>
+    <string name="inbox">Inbox</string>
+    <string name="compose">Compose</string>
+    <string name="send">Send</string>
+    <string name="from_hint">From</string>
+    <string name="to_hint">To</string>
+    <string name="subject_hint">Subject</string>
+    <string name="message_hint">Compose email</string>
+
+    <string name="cd_logo">App logo</string>
+    <string name="cd_illu">Onboarding illustration</string>
+    <string name="cd_google">Google sign-in</string>
+    <string name="cd_add_account">Add account</string>
+    <string name="cd_search">search</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:background="@drawable/background"
+    tools:context=".activities.MainActivity">
+
+
+    <!-- Logo -->
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="122dp"
+        android:layout_height="142dp"
+        android:src="@drawable/logowtext"
+        android:contentDescription="@string/cd_logo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="119dp"
+        android:layout_marginTop="130dp"
+        tools:ignore="ContentDescription"/>
+
+    <!-- Slogan -->
+    <TextView
+        android:id="@+id/tagline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Because Every Second Matters"
+        android:fontFamily="@font/readexpro_bold"
+        android:textSize="16sp"
+        android:textColor="#9C27B0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="62dp"
+        android:layout_marginTop="277dp"/>
+
+    <!-- Text Line -->
+    <TextView
+        android:id="@+id/subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Get started by Signing In"
+        android:fontFamily="@font/readexpro_medium"
+        android:textSize="14sp"
+        android:textColor="#5F6368"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="95dp"
+        android:layout_marginTop="370dp"/>
+
+    <!-- Card 1 -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardGoogle"
+        android:layout_width="290dp"
+        android:layout_height="46dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="@android:color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="35dp"
+        android:layout_marginTop="408dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/icGoogle"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/googleicon"
+                android:contentDescription="@string/cd_google"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginStart="14dp"
+                android:layout_marginTop="7dp"/>
+
+            <TextView
+                android:id="@+id/tvGoogle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sign in with Google"
+                android:fontFamily="@font/readexpro_medium"
+                android:textSize="13sp"
+                android:textColor="#000000"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginStart="83dp"
+                android:layout_marginTop="15dp"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Card 2 -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardAddAccount"
+        android:layout_width="290dp"
+        android:layout_height="46dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="@android:color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="35dp"
+        android:layout_marginTop="470dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/icLetter"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_solar_letter"
+                android:contentDescription="@string/cd_add_account"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginStart="18dp"
+                android:layout_marginTop="11dp"/>
+
+            <TextView
+                android:id="@+id/tvAddAccount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add account"
+                android:fontFamily="@font/readexpro_medium"
+                android:textSize="13sp"
+                android:textColor="#000000"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginStart="105dp"
+                android:layout_marginTop="15dp"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Sign in -->
+    <TextView
+        android:id="@+id/tvSignIn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign in"
+        android:fontFamily="@font/readexpro_bold"
+        android:textSize="14sp"
+        android:textColor="#6A1B9A"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="156dp"
+        android:layout_marginTop="536dp"/>
+
+    <!-- Logo name -->
+    <LinearLayout
+        android:id="@+id/brandRow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="82dp"
+        android:layout_marginTop="709dp">
+
+        <TextView
+            android:id="@+id/tvMelancholia"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Melancholia"
+            android:fontFamily="@font/readexpro_medium"
+            android:textSize="23sp"
+            android:textColor="#E2BFFF"/>
+
+        <TextView
+            android:id="@+id/tvWork"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" Work"
+            android:fontFamily="@font/readexpro_medium"
+            android:textSize="23sp"
+            android:textColor="#B0B0B0"/>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background">
+
+    <!-- Logo -->
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="79dp"
+        android:layout_height="79dp"
+        android:src="@drawable/logowtext"
+    android:contentDescription="@string/cd_logo"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    android:layout_marginTop="117dp" />
+
+    <!-- Title Sign In -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign In"
+        android:fontFamily="@font/readexpro_bold"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        app:layout_constraintTop_toBottomOf="@id/logo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="19dp" />
+
+    <!-- Subtitle -->
+    <TextView
+        android:id="@+id/tvSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter your account details."
+        android:fontFamily="@font/readexpro_medium"
+        android:textSize="14sp"
+        android:textColor="#606060"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp" />
+
+    <!-- EMAIL field -->
+    <TextView
+        android:id="@+id/labelEmail"
+        android:layout_width="324dp"
+        android:layout_height="wrap_content"
+        android:text="Email"
+        android:fontFamily="@font/readexpro_medium"
+        android:textSize="14sp"
+        android:textColor="#121212"
+        app:layout_constraintTop_toBottomOf="@id/tvSubtitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="36dp" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardEmail"
+        android:layout_width="324dp"
+        android:layout_height="46dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="#E9E9E9"
+        app:layout_constraintTop_toBottomOf="@id/labelEmail"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="6dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:gravity="center_vertical">
+
+            <EditText
+                android:id="@+id/etEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="you@example.com"
+                android:inputType="textEmailAddress"
+                android:fontFamily="@font/readexpro_medium"
+                android:background="@android:color/transparent"
+                android:textColor="#121212"
+                android:textColorHint="#7A7A7A"
+                android:padding="0dp"/>
+        </RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- PASSWORD field -->
+    <TextView
+        android:id="@+id/labelPassword"
+        android:layout_width="324dp"
+        android:layout_height="wrap_content"
+        android:text="Password"
+        android:fontFamily="@font/readexpro_medium"
+        android:textSize="14sp"
+        android:textColor="#121212"
+        app:layout_constraintTop_toBottomOf="@id/cardEmail"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardPassword"
+        android:layout_width="324dp"
+        android:layout_height="46dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="#E9E9E9"
+        app:layout_constraintTop_toBottomOf="@id/labelPassword"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="6dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:gravity="center_vertical">
+
+            <EditText
+                android:id="@+id/etPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="••••••••"
+                android:fontFamily="@font/readexpro_medium"
+                android:inputType="textPassword"
+                android:background="@android:color/transparent"
+                android:textColor="#121212"
+                android:textColorHint="#7A7A7A"
+                android:paddingEnd="36dp"
+                android:paddingStart="0dp"/>
+
+            <ImageView
+                android:id="@+id/ivTogglePassword"
+                android:layout_width="26dp"
+                android:layout_height="24dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="0dp"
+                android:src="@drawable/ic_eye_off"
+                android:tint="#606060" />
+        </RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Forgot password -->
+    <TextView
+        android:id="@+id/tvForgot"
+        android:layout_width="324dp"
+        android:layout_height="wrap_content"
+        android:text="Forgot password?"
+        android:fontFamily="@font/readexpro_bold"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="#6A1B9A"
+    android:gravity="end"
+    app:layout_constraintTop_toBottomOf="@id/cardPassword"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    android:layout_marginTop="12dp" />
+
+    <!-- Sign in button -->
+    <TextView
+        android:id="@+id/btnSignIn"
+        android:layout_width="324dp"
+        android:layout_height="46dp"
+        android:text="Sign in"
+        android:fontFamily="@font/readexpro_bold"
+        android:textSize="17sp"
+        android:textColor="#FFFFFF"
+        android:gravity="center"
+        android:background="@drawable/button"
+    app:layout_constraintTop_toBottomOf="@id/tvForgot"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    android:layout_marginTop="24dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

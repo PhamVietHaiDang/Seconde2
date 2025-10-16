@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF">
+
+    <!-- 1. Toolbar -->
+    <RelativeLayout
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#F5F5F5"
+        android:paddingHorizontal="16dp">
+
+        <!-- Back button on left -->
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:src="@drawable/ic_close"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Back"
+            android:padding="8dp" />
+
+        <!-- Action icons on right -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:orientation="horizontal">
+
+            <!-- Reply icon -->
+            <ImageButton
+                android:id="@+id/btnToolbarReply"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_reply"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Reply"
+                android:padding="8dp" />
+
+            <!-- Share icon -->
+            <ImageButton
+                android:id="@+id/btnShare"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_share"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Share"
+                android:padding="8dp" />
+
+            <!-- 3-dot menu icon -->
+            <ImageButton
+                android:id="@+id/btnMenu"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_more_vert"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="More options"
+                android:padding="8dp" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <!-- Divider line -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E0E0E0" />
+
+    <!-- Scrollable content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- 2. Email Header -->
+            <TextView
+                android:id="@+id/txtSubject"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="mobileApp25-26: Postpone of Moodle test"
+                android:fontFamily="@font/open_sans"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#02110E"
+                android:layout_marginBottom="24dp" />
+
+            <!-- Divider line -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0"
+                android:layout_marginBottom="16dp" />
+
+            <!-- 3. Sender Info Section -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16px">
+
+                <!-- Sender's profile picture -->
+                <ImageView
+                    android:id="@+id/imgSenderAvatar"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_alignParentStart="true"
+                    android:src="@mipmap/ic_launcher"
+                    android:scaleType="centerCrop"
+                    android:background="@drawable/cr35bffffff"
+                    android:contentDescription="Sender Avatar" />
+
+                <!-- 3-dot menu button for email content - MOVED HERE -->
+                <ImageButton
+                    android:id="@+id/btnContentMenu"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_more_vert"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Email actions"
+                    android:padding="8dp" />
+
+                <!-- Date sent -->
+                <TextView
+                    android:id="@+id/txtDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@id/btnContentMenu"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="8dp"
+                    android:text="3:41 PM • Sep 30, 2024"
+                    android:fontFamily="@font/readexpro_medium"
+                    android:textSize="12sp"
+                    android:textColor="#7F7F7F" />
+
+                <!-- Sender name and "To:" info -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@id/imgSenderAvatar"
+                    android:layout_toStartOf="@id/txtDate"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="12dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txtSender"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Son Tran Giang (via USTH Moodle)"
+                        android:fontFamily="@font/readexpro_medium"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#02110E" />
+
+                    <TextView
+                        android:id="@+id/txtTo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="to: you@example.com"
+                        android:fontFamily="@font/readexpro_medium"
+                        android:textSize="14sp"
+                        android:textColor="#7F7F7F"
+                        android:layout_marginTop="4dp" />
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <!-- Divider line -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0"
+                android:layout_marginBottom="16dp" />
+
+            <!-- 4. Email Content -->
+            <TextView
+                android:id="@+id/txtBody"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Dear Students,\n\nThis is to inform you that the Moodle test for mobileApp25-26 has been postponed. The new date will be announced soon.\n\nPlease check the announcements forum for updates.\n\nBest regards,\nSon Tran Giang"
+                android:fontFamily="@font/readexpro_medium"
+                android:textSize="16sp"
+                android:textColor="#02110E"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="24dp" />
+
+            <!-- Divider line -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0"
+                android:layout_marginBottom="16dp" />
+
+            <!-- 5. Rest of the conversation (placeholder for now) -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No more messages in this conversation"
+                android:fontFamily="@font/readexpro_medium"
+                android:textSize="14sp"
+                android:textColor="#7F7F7F"
+                android:gravity="center"
+                android:padding="24dp" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

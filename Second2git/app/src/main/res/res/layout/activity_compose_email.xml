@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#FFFFFF">
+
+    <!-- Header with exit button and action icons -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp">
+
+        <!-- Exit button on left -->
+        <ImageButton
+            android:id="@+id/btnExit"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentStart="true"
+            android:src="@drawable/ic_close"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Close"
+            android:padding="8dp" />
+
+        <!-- Action icons on right -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:orientation="horizontal">
+
+            <!-- Attachment icon -->
+            <ImageButton
+                android:id="@+id/btnAttachment"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_attachment"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Attach file"
+                android:padding="8dp" />
+
+            <!-- Send icon (replaces the button below) -->
+            <ImageButton
+                android:id="@+id/btnSendIcon"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_sent"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Send email"
+                android:padding="8dp" />
+
+            <!-- Settings (3 dots) icon -->
+            <ImageButton
+                android:id="@+id/btnSettings"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_more_vert"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="More options"
+                android:padding="8dp" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <EditText
+        android:id="@+id/editFrom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="From"
+        android:fontFamily="@font/open_sans"
+        android:inputType="textEmailAddress"
+        android:textSize="16sp" />
+
+    <!-- To field with arrow button -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp">
+
+        <EditText
+            android:id="@+id/editTo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="To"
+            android:fontFamily="@font/open_sans"
+            android:inputType="textEmailAddress"
+            android:textSize="16sp"
+            android:layout_toStartOf="@+id/btnExpandTo" />
+
+        <ImageButton
+            android:id="@+id/btnExpandTo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_arrow_drop_down"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Show Cc/Bcc"
+            android:padding="8dp" />
+
+    </RelativeLayout>
+
+    <!-- Cc field (initially hidden) -->
+    <EditText
+        android:id="@+id/editCc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Cc"
+        android:inputType="textEmailAddress"
+        android:textSize="16sp"
+        android:layout_marginTop="12dp"
+        android:visibility="gone" />
+
+    <!-- Bcc field (initially hidden) -->
+    <EditText
+        android:id="@+id/editBcc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Bcc"
+        android:inputType="textEmailAddress"
+        android:textSize="16sp"
+        android:layout_marginTop="12dp"
+        android:visibility="gone" />
+
+    <EditText
+        android:id="@+id/editSubject"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Subject"
+        android:fontFamily="@font/open_sans"
+        android:layout_marginTop="16dp"
+        android:inputType="textCapSentences"
+        android:textSize="16sp" />
+
+    <EditText
+        android:id="@+id/editMessage"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="16dp"
+        android:gravity="top"
+        android:hint="Compose email"
+        android:fontFamily="@font/open_sans"
+        android:inputType="textMultiLine"
+        android:textSize="16sp" />
+
+    <!-- Keep the original send button as backup or remove it -->
+    <Button
+        android:id="@+id/btnSend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/cr10bb362ff"
+        android:text="Send"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:visibility="gone" />
+
+</LinearLayout>

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <!-- Big top right circle -->
+    <View
+        android:id="@+id/circleTopRight"
+        android:layout_width="260dp"
+        android:layout_height="260dp"
+        android:background="@drawable/circle_umbre"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="243dp"
+        android:translationY="-140dp"/>
+
+    <!-- Small dot over middle -->
+    <View
+        android:id="@+id/dotOverHero"
+        android:layout_width="29dp"
+        android:layout_height="29dp"
+        android:background="@drawable/circle_dark_purple"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="270dp"
+        android:layout_marginTop="120dp"/>
+
+    <!-- Middle purple rings -->
+    <View
+        android:id="@+id/ring1"
+        android:layout_width="249dp"
+        android:layout_height="249dp"
+        android:background="@drawable/circle_dark_purple"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="55dp"
+        android:layout_marginTop="167dp"/>
+
+    <View
+        android:id="@+id/ring2"
+        android:layout_width="221dp"
+        android:layout_height="221dp"
+        android:background="@drawable/circle_purple"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="69dp"
+        android:layout_marginTop="181dp"/>
+
+    <!-- Left small circle -->
+    <View
+        android:id="@+id/circleLeft"
+        android:layout_width="66dp"
+        android:layout_height="66dp"
+        android:background="@drawable/circle_light_purple"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="416dp"
+        android:translationX="-33dp"/>
+
+    <!-- Rotated image -->
+    <ImageView
+        android:id="@+id/heroImage"
+        android:layout_width="336dp"
+        android:layout_height="336dp"
+        android:src="@drawable/calendar"
+        android:contentDescription="@string/cd_illu"
+        android:scaleType="fitCenter"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="157dp"
+        android:translationX="18dp"/>
+
+    <!-- Headline  -->
+    <!-- First line -->
+    <LinearLayout
+        android:id="@+id/headlineLine1"
+        android:layout_width="324dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="502dp">
+
+        <TextView
+            android:id="@+id/tvWELCOME"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="WELCOME "
+            android:fontFamily="@font/readexpro_bold"
+            android:textColor="@color/seconde_dark_purple"
+            android:textSize="24sp"/>
+
+        <TextView
+            android:id="@+id/tvTO"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TO "
+            android:fontFamily="@font/readexpro_bold"
+            android:textColor="#404040"
+            android:textSize="24sp"/>
+
+        <TextView
+            android:id="@+id/tvSECONDE"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SECONDE"
+            android:fontFamily="@font/readexpro_bold"
+            android:textColor="@color/seconde_dark_purple"
+            android:textSize="24sp"/>
+    </LinearLayout>
+
+    <!-- Second line -->
+    <TextView
+        android:id="@+id/headlineLine2"
+        android:layout_width="324dp"
+        android:layout_height="wrap_content"
+        android:text="EVERY SECOND COUNTS"
+        android:fontFamily="@font/readexpro_bold"
+        android:textColor="#404040"
+        android:textSize="24sp"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/headlineLine1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Subtext -->
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="324dp"
+        android:layout_height="wrap_content"
+        android:text="Manage all your emails with clarity, speed, and style — all in one place."
+        android:fontFamily="@font/open_sans"
+        android:textColor="#000000"
+        android:textSize="15sp"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="18dp"
+        android:layout_marginEnd="18dp"
+        android:layout_marginTop="579dp"/>
+
+    <!-- Pager -->
+    <RelativeLayout
+        android:id="@+id/pagerIndicators"
+        android:layout_width="156dp"
+        android:layout_height="10dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="659dp"
+        android:layout_marginStart="116dp">
+
+    </RelativeLayout>
+
+    <!-- Continue button -->
+    <TextView
+        android:id="@+id/btnContinue"
+        android:layout_width="324dp"
+        android:layout_height="46dp"
+        android:text="Continue"
+        android:textColor="#FFFFFF"
+        android:textSize="17sp"
+        android:gravity="center"
+        android:background="@drawable/button"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="709dp"
+        android:layout_marginStart="18dp"
+        android:layout_marginEnd="18dp"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

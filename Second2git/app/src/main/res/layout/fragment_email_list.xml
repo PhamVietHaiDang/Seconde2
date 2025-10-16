@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F9F3FF">
+
+    <!-- Main Content ScrollView -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#F9F3FF">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#F9F3FF">
+
+            <!-- Purple Header Section - This stays purple -->
+            <LinearLayout
+                android:id="@+id/rhfq7qa194pc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#ECD6FF"
+                android:paddingTop="39dp"
+                android:paddingBottom="13dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/r4c1jhptxeap"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/cr35bffffff"
+                    android:paddingVertical="11dp"
+                    android:paddingHorizontal="17dp"
+                    android:layout_marginBottom="18dp"
+                    android:layout_marginHorizontal="14dp"
+                    android:orientation="horizontal">
+
+                    <!-- Hamburger Menu Icon -->
+                    <ImageView
+                        android:id="@+id/btnMenu"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="13dp"
+                        android:src="@drawable/ic_menu"
+                        android:scaleType="fitXY"
+                        android:contentDescription="Menu" />
+
+                    <LinearLayout
+                        android:id="@+id/rfujveq0z3f"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="12dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/searchText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Search in mail"
+                            android:fontFamily="@font/open_sans"
+                            android:textColor="#7F7F7F"
+                            android:textSize="15sp" />
+                    </LinearLayout>
+
+                    <!-- Profile Icon -->
+                    <ImageView
+                        android:id="@+id/profileIcon"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@mipmap/ic_launcher"
+                        android:tint="#ECD6FF"
+                        android:scaleType="fitXY"
+                        android:contentDescription="Profile" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/folderTitle"
+                    android:textColor="#7F7F7F"
+                    android:textSize="14sp"
+                    android:layout_marginStart="14dp"
+                    android:layout_marginEnd="312dp"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Inbox"
+                    android:fontFamily="@font/open_sans_bold"/>
+            </LinearLayout>
+
+            <!-- Email List Container - WHITE for mail content -->
+            <LinearLayout
+                android:id="@+id/emailListContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#FFFFFF"
+                android:orientation="vertical" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Compose Button - Fixed in Bottom Right -->
+    <LinearLayout
+        android:id="@+id/composeButtonContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="29dp"
+        android:layout_marginEnd="29dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/composeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:background="@drawable/cr10bb362ff"
+            android:paddingVertical="16dp"
+            android:paddingHorizontal="17dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginEnd="10dp"
+                android:src="@drawable/ic_compose"
+                android:scaleType="fitXY"
+                android:contentDescription="Compose" />
+
+            <TextView
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="Compose" />
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/splash_nav"
+    app:startDestination="@id/inboxFragment">
+
+    <!-- Onboarding Flow -->
+    <fragment
+        android:id="@+id/onboarding1Fragment"
+        android:name="com.schoolproject.seconde2.OtherFragments.OnBoardingFragment1"
+        android:label="Onboarding 1"
+        tools:layout="@layout/fragment_onboarding_1">
+        <action
+            android:id="@+id/action_onboarding1_to_onboarding2"
+            app:destination="@id/onboarding2Fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/onboarding2Fragment"
+        android:name="com.schoolproject.seconde2.OtherFragments.OnBoardingFragment2"
+        android:label="Onboarding 2"
+        tools:layout="@layout/fragment_onboarding_2">
+        <action
+            android:id="@+id/action_onboarding2_to_onboarding3"
+            app:destination="@id/onboarding3Fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/onboarding3Fragment"
+        android:name="com.schoolproject.seconde2.OtherFragments.OnBoardingFragment3"
+        android:label="Onboarding 3"
+        tools:layout="@layout/fragment_onboarding_3">
+        <action
+            android:id="@+id/action_onboarding3_to_sign_in"
+            app:destination="@id/signInFragment" />
+    </fragment>
+
+    <!-- Sign In -->
+    <fragment
+        android:id="@+id/signInFragment"
+        android:name="com.schoolproject.seconde2.SignInFragment"
+        android:label="SignInFragment"
+        tools:layout="@layout/fragment_sign_in" />
+
+    <!-- Main App Fragments -->
+    <fragment
+        android:id="@+id/inboxFragment"
+        android:name="com.schoolproject.seconde2.EmailFragments.InboxFragment"
+        android:label="InboxFragment"
+        tools:layout="@layout/fragment_inbox" />
+
+    <fragment
+        android:id="@+id/draftFragment"
+        android:name="com.schoolproject.seconde2.EmailFragments.DraftFragment"
+        android:label="DraftFragment"
+        tools:layout="@layout/fragment_draft" />
+
+    <fragment
+        android:id="@+id/sentFragment"
+        android:name="com.schoolproject.seconde2.EmailFragments.SentFragment"
+        android:label="SentFragment"
+        tools:layout="@layout/fragment_sent" />
+
+    <fragment
+        android:id="@+id/trashFragment"
+        android:name="com.schoolproject.seconde2.EmailFragments.TrashFragment"
+        android:label="TrashFragment"
+        tools:layout="@layout/fragment_trash" />
+
+    <fragment
+        android:id="@+id/outlookFragment"
+        android:name="com.schoolproject.seconde2.EmailFragments.OutlookFragment"
+        android:label="OutlookFragment"
+        tools:layout="@layout/fragment_outlook" />
+
+    <fragment
+        android:id="@+id/allMailFragment"
+        android:name="com.schoolproject.seconde2.EmailFragments.AllMailFragment"
+        android:label="AllMailFragment"
+        tools:layout="@layout/fragment_all_mail" />
+
+    <fragment
+        android:id="@+id/contractsFragment"
+        android:name="com.schoolproject.seconde2.fragments.ContractsFragment"
+        android:label="ContractsFragment"
+        tools:layout="@layout/fragment_contracts" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.schoolproject.seconde2.fragments.SettingsFragment"
+        android:label="SettingsFragment"
+        tools:layout="@layout/fragment_settings" />
+</navigation>
