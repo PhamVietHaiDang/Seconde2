@@ -8,6 +8,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.schoolproject.seconde2.EmailConfig;
@@ -16,24 +17,24 @@ import com.schoolproject.seconde2.R;
 
 public class ReplyFragment extends Fragment {
 
-    // All the input fields and buttons
     private EditText fromField, toField, subjectField, messageField;
     private ImageButton backButton, sendButton;
     private TextView toolbarTitle;
     private TextView originalSenderText, originalSubjectText, originalDateText, originalBodyText;
     private ImageView iconType;
 
-    // Store the original email data
     private String originalSender;
     private String originalSubject;
     private String originalDate;
     private String originalBody;
 
+    // Constants for email configuration
+    private static final String EMAIL_APP_PASSWORD = "your-app-password";
+    private static final String REPLY_PREFIX = "Re: ";
+
     public ReplyFragment() {
-        // Empty constructor needed for fragments
     }
 
-    // Create a new reply fragment with email data
     public static ReplyFragment newInstance(String sender, String subject, String date, String body) {
         ReplyFragment fragment = new ReplyFragment();
         Bundle args = new Bundle();
@@ -46,73 +47,43 @@ public class ReplyFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_reply_forward, container, false);
 
-        // Set up all the views
         setupViews(view);
-
-        // Set up button click listeners
         setupClickListeners();
-
-        // Load the original email we're replying to
         loadOriginalEmail();
-
-        // Set up everything for reply mode
         setupReplyMode();
 
         return view;
     }
 
     private void setupViews(View view) {
-        // Find all the input fields
         fromField = view.findViewById(R.id.editFrom);
         toField = view.findViewById(R.id.editTo);
         subjectField = view.findViewById(R.id.editSubject);
         messageField = view.findViewById(R.id.editMessage);
 
-        // Find all the buttons
         backButton = view.findViewById(R.id.btnBack);
         sendButton = view.findViewById(R.id.btnSend);
 
-        // Find the toolbar title
         toolbarTitle = view.findViewById(R.id.toolbarTitle);
 
-        // Find the views that show the original email
         originalSenderText = view.findViewById(R.id.txtOriginalSender);
         originalSubjectText = view.findViewById(R.id.txtOriginalSubject);
         originalDateText = view.findViewById(R.id.txtOriginalDate);
         originalBodyText = view.findViewById(R.id.txtOriginalBody);
 
-        // Find the icon and set it to reply icon
         iconType = view.findViewById(R.id.iconType);
         iconType.setImageResource(R.drawable.ic_reply);
     }
 
     private void setupClickListeners() {
-        // Back button goes back to previous screen
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (getActivity() != null) {
-                    getActivity().onBackPressed();
-                }
-            }
-        });
-
-        // Send button sends the reply email
-        sendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sendReplyEmail();
-            }
-        });
+        backButton.setOnClickListener(v -> goBack());
+        sendButton.setOnClickListener(v -> sendReplyEmail());
     }
 
     private void loadOriginalEmail() {
-        // Get the email data that was passed to us
         Bundle arguments = getArguments();
         if (arguments != null) {
             originalSender = arguments.getString("sender");
@@ -120,99 +91,105 @@ public class ReplyFragment extends Fragment {
             originalDate = arguments.getString("date");
             originalBody = arguments.getString("body");
 
-            // Show the original email information
-            if (originalSenderText != null) {
-                originalSenderText.setText(originalSender);
-            }
-            if (originalSubjectText != null) {
-                originalSubjectText.setText(originalSubject);
-            }
-            if (originalDateText != null) {
-                originalDateText.setText(originalDate);
-            }
-            if (originalBodyText != null) {
-                originalBodyText.setText(originalBody);
-            }
+            updateOriginalEmailDisplay();
         }
     }
 
+    private void updateOriginalEmailDisplay() {
+        if (originalSenderText != null) originalSenderText.setText(originalSender);
+        if (originalSubjectText != null) originalSubjectText.setText(originalSubject);
+        if (originalDateText != null) originalDateText.setText(originalDate);
+        if (originalBodyText != null) originalBodyText.setText(originalBody);
+    }
+
     private void setupReplyMode() {
-        // Set the toolbar title to "Reply"
         if (toolbarTitle != null) {
             toolbarTitle.setText("Reply");
         }
 
-        // Pre-fill the "To" field with the sender's email
+        setupReplyToField();
+        setupReplySubject();
+        setupReplyMessage();
+    }
+
+    private void setupReplyToField() {
         if (originalSender != null && !originalSender.isEmpty()) {
             String replyToEmail = extractEmailFromSender(originalSender);
             toField.setText(replyToEmail);
         }
+    }
 
-        // Pre-fill the subject with "Re: " prefix
+    private void setupReplySubject() {
         if (originalSubject != null && !originalSubject.isEmpty()) {
-            String replySubject = "Re: " + originalSubject;
+            String replySubject = REPLY_PREFIX + originalSubject;
             subjectField.setText(replySubject);
         }
+    }
 
-        // Clear the message field for the user to type their reply
+    private void setupReplyMessage() {
         messageField.setText("");
         messageField.setHint("Type your reply here...");
     }
 
     private void sendReplyEmail() {
-        // Get all the input values
         String fromEmail = fromField.getText().toString().trim();
         String toEmail = toField.getText().toString().trim();
         String subjectText = subjectField.getText().toString().trim();
         String messageText = messageField.getText().toString().trim();
 
-        // Check if all required fields are filled
-        if (fromEmail.isEmpty() || toEmail.isEmpty() || subjectText.isEmpty() || messageText.isEmpty()) {
-            // TODO: Show error message to user
+        if (!validateEmailFields(fromEmail, toEmail, subjectText, messageText)) {
             return;
         }
 
-        // Send the email using our EmailSender class
-        EmailConfig config = new EmailConfig(fromEmail, "your-app-password");
+        sendEmailToServer(fromEmail, toEmail, subjectText, messageText);
+    }
 
-        EmailSender.sendEmail(config, toEmail, subjectText, messageText, new EmailSender.EmailSendListener() {
+    private boolean validateEmailFields(String from, String to, String subject, String message) {
+        if (from.isEmpty() || to.isEmpty() || subject.isEmpty() || message.isEmpty()) {
+            showToast("Please fill all required fields");
+            return false;
+        }
+        return true;
+    }
+
+    private void sendEmailToServer(String from, String to, String subject, String message) {
+        EmailConfig config = new EmailConfig(from, EMAIL_APP_PASSWORD);
+
+        EmailSender.sendEmail(config, to, subject, message, new EmailSender.EmailSendListener() {
             @Override
             public void onSuccess() {
-                // Email sent successfully
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            // TODO: Show success message
-                            // Go back to previous screen
-                            getActivity().onBackPressed();
-                        }
-                    });
-                }
+                handleSendSuccess();
             }
 
             @Override
             public void onError(String errorMessage) {
-                // There was an error sending the email
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            // TODO: Show error message to user
-                        }
-                    });
-                }
+                handleSendError(errorMessage);
             }
         });
     }
 
-    // Helper method to get email address from sender string
+    private void handleSendSuccess() {
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(() -> {
+                showToast("Reply sent successfully");
+                goBack();
+            });
+        }
+    }
+
+    private void handleSendError(String errorMessage) {
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(() -> {
+                showToast("Failed to send reply: " + errorMessage);
+            });
+        }
+    }
+
     private String extractEmailFromSender(String senderString) {
         if (senderString == null || senderString.isEmpty()) {
             return "";
         }
 
-        // Check if sender is in format "Name <email@domain.com>"
         if (senderString.contains("<") && senderString.contains(">")) {
             int startIndex = senderString.indexOf("<") + 1;
             int endIndex = senderString.indexOf(">");
@@ -221,7 +198,16 @@ public class ReplyFragment extends Fragment {
             }
         }
 
-        // If no brackets found, just use the whole string
         return senderString;
+    }
+
+    private void goBack() {
+        if (getActivity() != null) {
+            getActivity().onBackPressed();
+        }
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
     }
 }

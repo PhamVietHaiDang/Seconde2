@@ -5,6 +5,7 @@ import android.view.View;
 
 import com.schoolproject.seconde2.activities.EmailDetailActivity;
 import com.schoolproject.seconde2.BaseEmailFragment.EmailListFragment;
+import com.schoolproject.seconde2.model.Email;
 
 public class SentFragment extends EmailListFragment {
 
@@ -12,80 +13,58 @@ public class SentFragment extends EmailListFragment {
     protected void loadEmailData() {
         setFolderTitle("Sent");
 
-        // Check if we have any sent emails to show
-        boolean hasSentEmails = true; // Change this to false to see empty sent folder
-
-        if (hasSentEmails) {
-            loadSentEmails();
-        } else {
-            // Show empty sent folder message
-            showNoDataScreen("No sent emails", "You haven't sent any emails yet");
-        }
+        // Observe sent emails from database
+        observeEmails("sent");
     }
 
-    private void loadSentEmails() {
-        // Add all the sent emails to the list
-
-        // Homework submission email
-        addEmailToList(
-                "Professor Smith",
+    @Override
+    protected void loadSampleEmails(String folder) {
+        // Show sample data if no sent emails in database
+        addSentEmail("Professor Smith",
                 "Homework Assignment 5 Submission",
                 "Dear Professor, please find my homework assignment attached...",
                 "SENT • 8:15 AM",
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        openEmailDetails("Professor Smith",
-                                "Homework Assignment 5 Submission",
-                                "SENT • 8:15 AM",
-                                "prof.smith@university.edu",
-                                "Dear Professor,\n\nPlease find my homework assignment 5 attached to this email.\n\nI completed all the problems and included detailed explanations for problem 4.\n\nThank you!");
-                    }
-                }
-        );
+                "prof.smith@university.edu",
+                "Dear Professor,\n\nPlease find my homework assignment 5 attached to this email.\n\nI completed all the problems and included detailed explanations for problem 4.\n\nThank you!");
 
-        // Project team email
-        addEmailToList(
-                "Project Team",
+        addSentEmail("Project Team",
                 "Updated Design Mockups",
                 "Hi team, I've updated the design mockups based on our discussion...",
                 "SENT • 3:45 PM",
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        openEmailDetails("Project Team",
-                                "Updated Design Mockups",
-                                "SENT • 3:45 PM",
-                                "team@project.com",
-                                "Hi team,\n\nI've updated the design mockups based on our discussion yesterday. The changes include:\n\n- Improved navigation flow\n- Updated color scheme\n- Better button placements\n\nPlease review and let me know your feedback.");
-                    }
-                }
-        );
+                "team@project.com",
+                "Hi team,\n\nI've updated the design mockups based on our discussion yesterday. The changes include:\n\n- Improved navigation flow\n- Updated color scheme\n- Better button placements\n\nPlease review and let me know your feedback.");
 
-        // IT support email
-        addEmailToList(
-                "IT Support",
+        addSentEmail("IT Support",
                 "Software Installation Request",
                 "Hello, I need help installing the development software...",
                 "SENT • 11:20 AM",
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        openEmailDetails("IT Support",
-                                "Software Installation Request",
-                                "SENT • 11:20 AM",
-                                "itsupport@company.com",
-                                "Hello IT Support,\n\nI need assistance installing the following development software on my machine:\n\n- Android Studio\n- Git\n- Node.js\n\nPlease let me know when you can help with the installation.\n\nThank you!");
-                    }
-                }
-        );
+                "itsupport@company.com",
+                "Hello IT Support,\n\nI need assistance installing the following development software on my machine:\n\n- Android Studio\n- Git\n- Node.js\n\nPlease let me know when you can help with the installation.\n\nThank you!");
+    }
+
+    private void addSentEmail(String from, String subject, String preview, String date, String to, String body) {
+        addEmailToList(from, subject, preview, date,
+                v -> openEmailDetails(from, subject, date, to, body));
+    }
+
+    @Override
+    protected void openEmailDetails(Email email) {
+        if (getActivity() == null) return;
+
+        Intent intent = new Intent(getActivity(), EmailDetailActivity.class);
+        intent.putExtra("sender", email.sender);
+        intent.putExtra("subject", email.subject);
+        intent.putExtra("date", email.date);
+        intent.putExtra("to", "user@example.com");
+        intent.putExtra("body", email.body);
+
+        startActivity(intent);
     }
 
     private void openEmailDetails(String from, String subject, String date, String to, String body) {
-        // Open the email detail screen with the sent email
-        Intent intent = new Intent(getActivity(), EmailDetailActivity.class);
+        if (getActivity() == null) return;
 
-        // Pass all the email data to the detail screen
+        Intent intent = new Intent(getActivity(), EmailDetailActivity.class);
         intent.putExtra("sender", from);
         intent.putExtra("subject", subject);
         intent.putExtra("date", date);

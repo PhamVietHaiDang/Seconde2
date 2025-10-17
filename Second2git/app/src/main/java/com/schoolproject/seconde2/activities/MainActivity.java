@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.schoolproject.seconde2.R;
 import com.schoolproject.seconde2.OnBoardingFragment1;
@@ -19,6 +20,7 @@ import com.schoolproject.seconde2.OnBoardingFragment3;
 import com.schoolproject.seconde2.SignInFragment;
 import com.schoolproject.seconde2.fragments.ContractsFragment;
 import com.schoolproject.seconde2.fragments.SettingsFragment;
+import com.schoolproject.seconde2.viewmodel.EmailViewModel;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,25 +29,31 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout composeButton;
     private View mainInboxContent;
     private View overlayContainer;
+    private EmailViewModel emailViewModel;
+
+    private String userEmail;
+    private String userPassword;
+
+    private static final String PREFS_NAME = "app_prefs";
+    private static final String KEY_ONBOARDING_DONE = "onboarding_done";
+    private static final String KEY_USER_EMAIL = "user_email";
+    private static final String KEY_USER_PASSWORD = "user_password";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Check if onboarding is completed
-        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
-        boolean onboardingDone = prefs.getBoolean("onboarding_done", false);
+        // Initialize ViewModel
+        emailViewModel = new ViewModelProvider(this).get(EmailViewModel.class);
 
         setupViews();
         setupClickListeners();
+        loadUserCredentials();
+        checkOnboardingStatus();
 
-        // If onboarding not completed, show onboarding flow
-        if (!onboardingDone) {
-            showOnboardingFragment1();
-        } else {
-            showMainInbox();
-        }
+        // Observe emails
+        observeEmails();
     }
 
     private void setupViews() {
@@ -57,32 +65,99 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        menuButton.setOnClickListener(v ->
-                drawerLayout.openDrawer(findViewById(R.id.nav_custom)));
-
-        composeButton.setOnClickListener(v -> {
-            Intent composeIntent = new Intent(MainActivity.this, ComposeEmailActivity.class);
-            startActivity(composeIntent);
-        });
+        menuButton.setOnClickListener(v -> openNavigationDrawer());
+        composeButton.setOnClickListener(v -> openComposeEmail());
 
         setupNavigationClicks();
         setupEmailItemClicks();
+    }
+
+    private void loadUserCredentials() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        userEmail = prefs.getString(KEY_USER_EMAIL, null);
+        userPassword = prefs.getString(KEY_USER_PASSWORD, null);
+
+        if (userEmail != null && userPassword != null) {
+            emailViewModel.setCredentials(userEmail, userPassword);
+        }
+    }
+
+    public void setUserCredentials(String email, String password) {
+        this.userEmail = email;
+        this.userPassword = password;
+
+        // Store in SharedPreferences for persistence
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        prefs.edit()
+                .putString(KEY_USER_EMAIL, email)
+                .putString(KEY_USER_PASSWORD, password)
+                .apply();
+
+        // Update ViewModel with credentials
+        emailViewModel.setCredentials(email, password);
+
+        // Refresh emails after signing in
+        refreshAllEmails();
+    }
+
+    private void refreshAllEmails() {
+        if (userEmail != null && userPassword != null) {
+            emailViewModel.refreshEmails("inbox");
+            emailViewModel.refreshEmails("sent");
+            emailViewModel.refreshEmails("draft");
+        }
+    }
+
+    private void observeEmails() {
+        // Observe all emails
+        emailViewModel.getAllEmails().observe(this, emails -> {
+            if (emails != null && !emails.isEmpty()) {
+                // Emails are available
+                Toast.makeText(this, "Loaded " + emails.size() + " emails", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void checkOnboardingStatus() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        boolean onboardingDone = prefs.getBoolean(KEY_ONBOARDING_DONE, false);
+
+        if (!onboardingDone) {
+            showOnboardingFragment1();
+        } else {
+            // Check if user is already signed in
+            if (userEmail != null && userPassword != null) {
+                showMainInbox();
+                refreshAllEmails();
+            } else {
+                showSignInFragment();
+            }
+        }
     }
 
     private void setupNavigationClicks() {
         findViewById(R.id.nav_inbox).setOnClickListener(v -> {
             showMainInbox();
             closeNavigationDrawer();
+            if (userEmail != null) {
+                emailViewModel.refreshEmails("inbox");
+            }
         });
 
         findViewById(R.id.nav_draft).setOnClickListener(v -> {
             showFragment(new com.schoolproject.seconde2.EmailFragments.DraftFragment());
             closeNavigationDrawer();
+            if (userEmail != null) {
+                emailViewModel.refreshEmails("draft");
+            }
         });
 
         findViewById(R.id.nav_sent).setOnClickListener(v -> {
             showFragment(new com.schoolproject.seconde2.EmailFragments.SentFragment());
             closeNavigationDrawer();
+            if (userEmail != null) {
+                emailViewModel.refreshEmails("sent");
+            }
         });
 
         findViewById(R.id.nav_trash).setOnClickListener(v -> {
@@ -106,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.nav_settings).setOnClickListener(v -> {
-            showFragment(new SettingsFragment(), false); // Hide compose button for settings
+            showFragment(new SettingsFragment(), false);
             closeNavigationDrawer();
         });
     }
@@ -143,73 +218,57 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void openComposeEmail() {
+        if (userEmail == null || userPassword == null) {
+            Toast.makeText(this, "Please sign in first", Toast.LENGTH_SHORT).show();
+            showSignInFragment();
+            return;
+        }
+
+        Intent composeIntent = new Intent(this, ComposeEmailActivity.class);
+        startActivity(composeIntent);
+    }
+
     private void closeNavigationDrawer() {
         drawerLayout.closeDrawer(findViewById(R.id.nav_custom));
     }
 
-    // Show onboarding flow (overlay on top of main content)
     public void showOnboardingFragment1() {
-        mainInboxContent.setVisibility(View.GONE);
-        overlayContainer.setVisibility(View.VISIBLE);
-        composeButton.setVisibility(View.GONE); // Hide compose button
-
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.overlay_container, new OnBoardingFragment1());
-        transaction.commit();
+        showOverlayFragment(new OnBoardingFragment1(), false);
     }
 
     public void showOnboardingFragment2() {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
-        transaction.replace(R.id.overlay_container, new OnBoardingFragment2());
-        transaction.commit();
-
-        composeButton.setVisibility(View.GONE); // Hide compose button
+        showOverlayFragment(new OnBoardingFragment2(), false);
     }
 
     public void showOnboardingFragment3() {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
-        transaction.replace(R.id.overlay_container, new OnBoardingFragment3());
-        transaction.commit();
-
-        composeButton.setVisibility(View.GONE); // Hide compose button
+        showOverlayFragment(new OnBoardingFragment3(), false);
     }
 
     public void showSignInFragment() {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
-        transaction.replace(R.id.overlay_container, new SignInFragment());
-        transaction.commit();
-
-        composeButton.setVisibility(View.GONE); // Hide compose button
+        showOverlayFragment(new SignInFragment(), false);
     }
 
-    // Show main inbox content (hide onboarding)
     public void showMainInbox() {
         mainInboxContent.setVisibility(View.VISIBLE);
         overlayContainer.setVisibility(View.GONE);
-        composeButton.setVisibility(View.VISIBLE); // Show compose button
+        composeButton.setVisibility(View.VISIBLE);
 
-        // Mark onboarding as completed
-        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
-        prefs.edit().putBoolean("onboarding_done", true).apply();
+        markOnboardingCompleted();
     }
 
-    // Show other fragments (replace main content) - Updated with showComposeButton parameter
     private void showFragment(Fragment fragment) {
-        showFragment(fragment, true); // Default: show compose button
+        showFragment(fragment, true);
     }
 
     private void showFragment(Fragment fragment, boolean showComposeButton) {
+        showOverlayFragment(fragment, showComposeButton);
+    }
+
+    private void showOverlayFragment(Fragment fragment, boolean showComposeButton) {
         mainInboxContent.setVisibility(View.GONE);
         overlayContainer.setVisibility(View.VISIBLE);
-
-        if (showComposeButton) {
-            composeButton.setVisibility(View.VISIBLE); // Show compose button
-        } else {
-            composeButton.setVisibility(View.GONE); // Hide compose button
-        }
+        composeButton.setVisibility(showComposeButton ? View.VISIBLE : View.GONE);
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.overlay_container, fragment);
@@ -230,5 +289,35 @@ public class MainActivity extends AppCompatActivity {
         if (drawerLayout != null) {
             drawerLayout.openDrawer(findViewById(R.id.nav_custom));
         }
+    }
+
+    private void markOnboardingCompleted() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        prefs.edit().putBoolean(KEY_ONBOARDING_DONE, true).apply();
+    }
+
+    public boolean isOnboardingCompleted() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        return prefs.getBoolean(KEY_ONBOARDING_DONE, false);
+    }
+
+    public void resetOnboarding() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        prefs.edit().putBoolean(KEY_ONBOARDING_DONE, false).apply();
+    }
+
+    public String getCurrentFragment() {
+        if (mainInboxContent.getVisibility() == View.VISIBLE) {
+            return "inbox";
+        }
+        return "unknown";
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public boolean isUserSignedIn() {
+        return userEmail != null && userPassword != null;
     }
 }

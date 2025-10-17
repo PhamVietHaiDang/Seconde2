@@ -11,105 +11,75 @@ public class ContractsFragment extends EmailListFragment {
     @Override
     protected void loadEmailData() {
         setFolderTitle("Contracts");
-
-        // Load all the company contracts we have
         loadAllContracts();
     }
 
     private void loadAllContracts() {
-        // Add contracts from different companies we work with
         addMicrosoftContract();
         addGoogleContract();
         addAmazonContract();
         addSlackContract();
         addAdobeContract();
-
-        // We can add more contracts here when we get new ones
     }
 
     private void addMicrosoftContract() {
-        addEmailToList(
-                "Microsoft Corporation",
+        addContract("Microsoft Corporation",
                 "Software License Agreement",
                 "Office 365 Business Premium - 50 users",
-                "Active • Renews: Dec 2024",
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        openContractDetails("Microsoft Corporation");
-                    }
-                }
-        );
+                "Active • Renews: Dec 2024");
     }
 
     private void addGoogleContract() {
-        addEmailToList(
-                "Google Cloud Platform",
+        addContract("Google Cloud Platform",
                 "Cloud Services Agreement",
                 "GCP Enterprise Support - Production",
-                "Active • Renews: Jan 2025",
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        openContractDetails("Google Cloud Platform");
-                    }
-                }
-        );
+                "Active • Renews: Jan 2025");
     }
 
     private void addAmazonContract() {
-        addEmailToList(
-                "Amazon Web Services",
+        addContract("Amazon Web Services",
                 "Hosting Service Contract",
                 "AWS Business Support Plan",
-                "Active • Renews: Nov 2024",
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        openContractDetails("Amazon Web Services");
-                    }
-                }
-        );
+                "Active • Renews: Nov 2024");
     }
 
     private void addSlackContract() {
-        addEmailToList(
-                "Slack Technologies",
+        addContract("Slack Technologies",
                 "Collaboration Subscription",
                 "Slack Enterprise Grid - 100 seats",
-                "Active • Renews: Mar 2025",
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        openContractDetails("Slack Technologies");
-                    }
-                }
-        );
+                "Active • Renews: Mar 2025");
     }
 
     private void addAdobeContract() {
-        addEmailToList(
-                "Adobe Inc.",
+        addContract("Adobe Inc.",
                 "Creative Cloud License",
                 "Adobe Creative Cloud - Design Team",
-                "Active • Renews: Feb 2025",
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        openContractDetails("Adobe Inc.");
-                    }
-                }
-        );
+                "Active • Renews: Feb 2025");
+    }
+
+    private void addContract(String company, String title, String description, String status) {
+        addEmailToList(company, title, description, status,
+                v -> openContractDetails(company));
     }
 
     private void openContractDetails(String companyName) {
-        // Open the contract detail screen for this company
+        if (getActivity() == null) return;
+
         Intent contractIntent = new Intent(getActivity(), ContractDetailActivity.class);
-
-        // Tell the detail screen which company we're looking at
         contractIntent.putExtra("company_name", companyName);
-
-        // Start the detail activity
         startActivity(contractIntent);
+    }
+
+    // Backend integration methods
+    private void fetchContractsFromBackend() {
+
+    }
+
+    private void displayContracts(java.util.List<Object> contracts) {
+        if (contracts == null || contracts.isEmpty()) {
+            showNoDataScreen("No contracts", "No active contracts found");
+            return;
+        }
+
     }
 }

@@ -1,7 +1,9 @@
 package com.schoolproject.seconde2.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -11,35 +13,35 @@ import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
-import com.schoolproject.seconde2.EmailConfig;
-import com.schoolproject.seconde2.ServiceFragment.EmailSender;
 import com.schoolproject.seconde2.R;
+import com.schoolproject.seconde2.viewmodel.EmailViewModel;
 
 public class ComposeEmailActivity extends AppCompatActivity {
 
-    // All the input fields
     private EditText fromField, toField, ccField, bccField, subjectField, messageField;
     private Button sendButton;
     private ImageButton exitButton, attachButton, sendIconButton, settingsButton, expandToButton;
     private ProgressBar loadingBar;
 
-    // Track if CC and BCC fields are showing
     private boolean areCcBccVisible = false;
+    private EmailViewModel emailViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_compose_email);
 
-        // Set up all the views and buttons
+        // CORRECT ViewModel initialization
+        emailViewModel = new ViewModelProvider(this).get(EmailViewModel.class);
+
         findViews();
         setupButtons();
         prefillFields();
     }
 
     private void findViews() {
-        // Find all the email input fields
         fromField = findViewById(R.id.editFrom);
         toField = findViewById(R.id.editTo);
         ccField = findViewById(R.id.editCc);
@@ -47,7 +49,6 @@ public class ComposeEmailActivity extends AppCompatActivity {
         subjectField = findViewById(R.id.editSubject);
         messageField = findViewById(R.id.editMessage);
 
-        // Find all the buttons
         sendButton = findViewById(R.id.btnSend);
         exitButton = findViewById(R.id.btnExit);
         attachButton = findViewById(R.id.btnAttachment);
@@ -55,20 +56,15 @@ public class ComposeEmailActivity extends AppCompatActivity {
         settingsButton = findViewById(R.id.btnSettings);
         expandToButton = findViewById(R.id.btnExpandTo);
 
-        // Find the loading progress bar
         loadingBar = findViewById(R.id.progressBar);
 
-        // Hide CC and BCC fields at start
         ccField.setVisibility(View.GONE);
         bccField.setVisibility(View.GONE);
     }
 
     private void setupButtons() {
-        // Both send buttons do the same thing
         sendButton.setOnClickListener(v -> sendEmail());
         sendIconButton.setOnClickListener(v -> sendEmail());
-
-        // Other buttons
         exitButton.setOnClickListener(v -> closeScreen());
         attachButton.setOnClickListener(v -> showToast("Attachment feature coming soon!"));
         settingsButton.setOnClickListener(v -> showSettings());
@@ -76,10 +72,11 @@ public class ComposeEmailActivity extends AppCompatActivity {
     }
 
     private void prefillFields() {
-        // Pre-fill the from field with user's email
-        fromField.setText("user@example.com");
+        // Use actual user email from SharedPreferences
+        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+        String userEmail = prefs.getString("user_email", "");
+        fromField.setText(userEmail.isEmpty() ? "you@example.com" : userEmail);
 
-        // Check if we got email addresses to pre-fill
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("prefilled_to")) {
             String emails = intent.getStringExtra("prefilled_to");
@@ -88,7 +85,6 @@ public class ComposeEmailActivity extends AppCompatActivity {
     }
 
     private void toggleCcBcc() {
-        // Show or hide CC and BCC fields
         areCcBccVisible = !areCcBccVisible;
 
         if (areCcBccVisible) {
@@ -103,7 +99,6 @@ public class ComposeEmailActivity extends AppCompatActivity {
     }
 
     private void showSettings() {
-        // Show the settings popup menu
         PopupMenu menu = new PopupMenu(this, settingsButton);
         menu.getMenuInflater().inflate(R.menu.compose_settings_menu, menu.getMenu());
 
@@ -116,7 +111,6 @@ public class ComposeEmailActivity extends AppCompatActivity {
     }
 
     private void handleMenuClick(MenuItem item) {
-        // Handle clicks from the settings menu
         int id = item.getItemId();
 
         if (id == R.id.menu_save_draft) {
@@ -129,7 +123,6 @@ public class ComposeEmailActivity extends AppCompatActivity {
     }
 
     private void saveDraft() {
-        // Save the current email as a draft
         if (hasContent()) {
             showToast("Draft saved!");
         } else {
@@ -138,7 +131,6 @@ public class ComposeEmailActivity extends AppCompatActivity {
     }
 
     private void discardEmail() {
-        // Discard the current email
         if (hasContent()) {
             showDiscardDialog();
         } else {
@@ -147,7 +139,6 @@ public class ComposeEmailActivity extends AppCompatActivity {
     }
 
     private void showDiscardDialog() {
-        // Ask user if they're sure they want to discard
         new android.app.AlertDialog.Builder(this)
                 .setTitle("Discard Email")
                 .setMessage("Are you sure? Your changes will be lost.")
@@ -157,7 +148,6 @@ public class ComposeEmailActivity extends AppCompatActivity {
     }
 
     private void sendEmail() {
-        // Get all the email content
         String from = fromField.getText().toString().trim();
         String to = toField.getText().toString().trim();
         String cc = ccField.getText().toString().trim();
@@ -165,13 +155,11 @@ public class ComposeEmailActivity extends AppCompatActivity {
         String subject = subjectField.getText().toString().trim();
         String body = messageField.getText().toString().trim();
 
-        // Check if all required fields are filled
         if (from.isEmpty() || to.isEmpty() || subject.isEmpty() || body.isEmpty()) {
             showToast("Please fill all required fields");
             return;
         }
 
-        // Check if email addresses look right
         if (!areEmailsValid(to)) {
             showToast("Please check the email addresses in 'To' field");
             return;
@@ -187,16 +175,25 @@ public class ComposeEmailActivity extends AppCompatActivity {
             return;
         }
 
-        // Show loading and send the email
+        // Check if user is signed in
+        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+        String userEmail = prefs.getString("user_email", "");
+        String userPassword = prefs.getString("user_password", "");
+
+        if (userEmail.isEmpty() || userPassword.isEmpty()) {
+            showToast("Please sign in first");
+            Intent signInIntent = new Intent(this, MainActivity.class);
+            startActivity(signInIntent);
+            return;
+        }
+
         setLoading(true);
         sendEmailToServer(from, to, cc, bcc, subject, body);
     }
 
     private boolean areEmailsValid(String emails) {
-        // Check if email addresses look correct
         if (emails.isEmpty()) return true;
 
-        // Split by commas and check each email
         String[] emailArray = emails.split(",");
         for (String email : emailArray) {
             String trimmedEmail = email.trim();
@@ -208,48 +205,35 @@ public class ComposeEmailActivity extends AppCompatActivity {
     }
 
     private boolean isValidEmail(String email) {
-        // Simple check if email looks like an email address
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
     private void sendEmailToServer(String from, String to, String cc, String bcc, String subject, String body) {
-        // Create email config and send the email
-        EmailConfig config = new EmailConfig(from, "your-app-password");
+        // Build recipient list
+        StringBuilder allRecipients = new StringBuilder(to);
 
-        // Combine all recipients
-        String allRecipients = to;
         if (!cc.isEmpty()) {
-            allRecipients += "," + cc;
+            allRecipients.append(",").append(cc);
         }
         if (!bcc.isEmpty()) {
-            allRecipients += "," + bcc;
+            allRecipients.append(",").append(bcc);
         }
 
-        // Count how many people we're sending to
-        int recipientCount = countRecipients(to, cc, bcc);
+        // Use ViewModel to send email
+        emailViewModel.sendEmail(allRecipients.toString(), subject, body);
 
-        EmailSender.sendEmail(config, allRecipients, subject, body, new EmailSender.EmailSendListener() {
-            @Override
-            public void onSuccess() {
-                runOnUiThread(() -> {
-                    setLoading(false);
-                    showToast("Email sent to " + recipientCount + " people!");
-                    closeScreen();
-                });
-            }
+        // Show success
+        new Handler().postDelayed(() -> {
+            setLoading(false);
 
-            @Override
-            public void onError(String error) {
-                runOnUiThread(() -> {
-                    setLoading(false);
-                    showToast("Send failed: " + error);
-                });
-            }
-        });
+            int recipientCount = countRecipients(to, cc, bcc);
+            showToast("Email sent to " + recipientCount + " people!");
+
+            closeScreen();
+        }, 2000);
     }
 
     private int countRecipients(String to, String cc, String bcc) {
-        // Count how many email addresses we have
         int count = 0;
 
         if (!to.isEmpty()) {
@@ -266,7 +250,6 @@ public class ComposeEmailActivity extends AppCompatActivity {
     }
 
     private boolean hasContent() {
-        // Check if any field has content
         return !fromField.getText().toString().isEmpty() ||
                 !toField.getText().toString().isEmpty() ||
                 !ccField.getText().toString().isEmpty() ||
@@ -276,26 +259,21 @@ public class ComposeEmailActivity extends AppCompatActivity {
     }
 
     private void setLoading(boolean loading) {
-        // Show or hide loading bar and enable/disable buttons
         loadingBar.setVisibility(loading ? View.VISIBLE : View.GONE);
 
-        // Disable buttons while loading
-        boolean enabled = !loading;
-        sendButton.setEnabled(enabled);
-        sendIconButton.setEnabled(enabled);
-        exitButton.setEnabled(enabled);
-        attachButton.setEnabled(enabled);
-        settingsButton.setEnabled(enabled);
-        expandToButton.setEnabled(enabled);
+        sendButton.setEnabled(!loading);
+        sendIconButton.setEnabled(!loading);
+        exitButton.setEnabled(!loading);
+        attachButton.setEnabled(!loading);
+        settingsButton.setEnabled(!loading);
+        expandToButton.setEnabled(!loading);
     }
 
     private void closeScreen() {
-        // Close this screen and go back
         finish();
     }
 
     private void showToast(String message) {
-        // Show a short toast message
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

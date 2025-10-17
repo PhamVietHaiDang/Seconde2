@@ -10,16 +10,17 @@ public class OutlookFragment extends EmailListFragment {
     @Override
     protected void loadEmailData() {
         setFolderTitle("Outlook");
+        showOutlookNotConnected();
+    }
 
-        // Show message that Outlook emails aren't connected yet
+    private void showOutlookNotConnected() {
         showNoDataScreen("No Outlook emails", "Connect your Outlook account to see emails here");
     }
 
     private void openEmail(String from, String subject, String date, String to, String body) {
-        // Open the email detail screen
-        Intent intent = new Intent(getActivity(), EmailDetailActivity.class);
+        if (getActivity() == null) return;
 
-        // Pass all the email data to the detail screen
+        Intent intent = new Intent(getActivity(), EmailDetailActivity.class);
         intent.putExtra("sender", from);
         intent.putExtra("subject", subject);
         intent.putExtra("date", date);
@@ -27,5 +28,16 @@ public class OutlookFragment extends EmailListFragment {
         intent.putExtra("body", body);
 
         startActivity(intent);
+    }
+
+    // Backend integration methods
+    private void fetchOutlookEmails() {
+    }
+    private void displayOutlookEmails(java.util.List<Object> emails) {
+        if (emails == null || emails.isEmpty()) {
+            showOutlookNotConnected();
+            return;
+        }
+
     }
 }

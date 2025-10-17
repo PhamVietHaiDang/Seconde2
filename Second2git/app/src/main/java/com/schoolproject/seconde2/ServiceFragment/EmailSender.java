@@ -10,77 +10,82 @@ import java.util.Properties;
 
 public class EmailSender {
 
-    // Interface to know when email sending is done
     public interface EmailSendListener {
         void onSuccess();
         void onError(String error);
     }
 
-    // Main method to send an email to multiple people
     public static void sendEmail(EmailConfig config, String toEmails, String emailSubject,
                                  String emailMessage, EmailSendListener callback) {
 
-        // Use AsyncTask to send email in background so app doesn't freeze
-        new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(Void... params) {
-                try {
-                    // Set up the email server settings
-                    Properties props = new Properties();
-                    props.put("mail.smtp.auth", "true");
-                    props.put("mail.smtp.starttls.enable", "true");
-                    props.put("mail.smtp.host", EmailConfig.SMTP_SERVER);
-                    props.put("mail.smtp.port", EmailConfig.SMTP_PORT);
+        new EmailSendTask(config, toEmails, emailSubject, emailMessage, callback).execute();
+    }
 
-                    // Create a session with login credentials
-                    Session emailSession = Session.getInstance(props,
-                            new javax.mail.Authenticator() {
-                                @Override
-                                protected PasswordAuthentication getPasswordAuthentication() {
-                                    // Use the email and password from config
-                                    return new PasswordAuthentication(config.getEmail(), config.getPassword());
-                                }
-                            });
+    private static class EmailSendTask extends AsyncTask<Void, Void, String> {
+        private final EmailConfig config;
+        private final String toEmails;
+        private final String emailSubject;
+        private final String emailMessage;
+        private final EmailSendListener callback;
 
-                    // Create the email message
-                    Message message = new MimeMessage(emailSession);
+        EmailSendTask(EmailConfig config, String toEmails, String emailSubject,
+                      String emailMessage, EmailSendListener callback) {
+            this.config = config;
+            this.toEmails = toEmails;
+            this.emailSubject = emailSubject;
+            this.emailMessage = emailMessage;
+            this.callback = callback;
+        }
 
-                    // Set who the email is from
-                    message.setFrom(new InternetAddress(config.getEmail()));
-
-                    // Set who to send the email to (can be multiple people)
-                    message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmails));
-
-                    // Set the email subject
-                    message.setSubject(emailSubject);
-
-                    // Set the email message body
-                    message.setText(emailMessage);
-
-                    // Actually send the email
-                    Transport.send(message);
-
-                    // If we get here, everything worked
-                    return null;
-
-                } catch (Exception e) {
-                    // If something went wrong, return the error message
-                    e.printStackTrace();
-                    return e.getMessage();
-                }
+        @Override
+        protected String doInBackground(Void... params) {
+            try {
+                Properties props = createEmailProperties();
+                Session emailSession = createEmailSession(props);
+                Message message = createEmailMessage(emailSession);
+                Transport.send(message);
+                return null;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return e.getMessage();
             }
+        }
 
-            @Override
-            protected void onPostExecute(String result) {
-                // This runs on the main thread after sending is done
-                if (result != null) {
-                    // There was an error sending the email
-                    callback.onError(result);
-                } else {
-                    // Email was sent successfully
-                    callback.onSuccess();
-                }
+        private Properties createEmailProperties() {
+            Properties props = new Properties();
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.host", EmailConfig.SMTP_SERVER);
+            props.put("mail.smtp.port", EmailConfig.SMTP_PORT);
+            return props;
+        }
+
+        private Session createEmailSession(Properties props) {
+            return Session.getInstance(props,
+                    new javax.mail.Authenticator() {
+                        @Override
+                        protected PasswordAuthentication getPasswordAuthentication() {
+                            return new PasswordAuthentication(config.getEmail(), config.getPassword());
+                        }
+                    });
+        }
+
+        private Message createEmailMessage(Session session) throws Exception {
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(config.getEmail()));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmails));
+            message.setSubject(emailSubject);
+            message.setText(emailMessage);
+            return message;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            if (result != null) {
+                callback.onError(result);
+            } else {
+                callback.onSuccess();
             }
-        }.execute(); // Start the background task
+        }
     }
 }

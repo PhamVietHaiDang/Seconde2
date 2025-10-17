@@ -24,6 +24,11 @@ public class MenuAdapter extends ArrayAdapter<String> {
             R.drawable.ic_warning
     };
 
+    // Constants for better maintainability
+    private static final int SPAM_ITEM_POSITION = 3;
+    private static final int DEFAULT_TEXT_COLOR = Color.BLACK;
+    private static final int SPAM_TEXT_COLOR = Color.RED;
+
     public MenuAdapter(Context context, String[] menuItems) {
         super(context, R.layout.menu_item, menuItems);
         this.context = context;
@@ -33,28 +38,41 @@ public class MenuAdapter extends ArrayAdapter<String> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        // Create a new view if we don't have one to reuse
+        ViewHolder viewHolder;
+
         if (convertView == null) {
             LayoutInflater inflater = LayoutInflater.from(context);
             convertView = inflater.inflate(R.layout.menu_item, parent, false);
-        }
 
-        // Find the icon and text views
-        ImageView icon = convertView.findViewById(R.id.menu_icon);
-        TextView text = convertView.findViewById(R.id.menu_text);
+            viewHolder = new ViewHolder();
+            viewHolder.icon = convertView.findViewById(R.id.menu_icon);
+            viewHolder.text = convertView.findViewById(R.id.menu_text);
 
-        // Set the icon and text for this menu item
-        icon.setImageResource(icons[position]);
-        text.setText(menuItems[position]);
-
-        // Make the "Report as spam" item red (it's the 4th item)
-        if (position == 3) {
-            text.setTextColor(Color.RED);
+            convertView.setTag(viewHolder);
         } else {
-            // All other items are black
-            text.setTextColor(Color.BLACK);
+            viewHolder = (ViewHolder) convertView.getTag();
         }
 
+        setupMenuItem(viewHolder, position);
         return convertView;
+    }
+
+    private void setupMenuItem(ViewHolder viewHolder, int position) {
+        // Set icon and text
+        viewHolder.icon.setImageResource(icons[position]);
+        viewHolder.text.setText(menuItems[position]);
+
+        // Set text color - spam item is red, others are black
+        if (position == SPAM_ITEM_POSITION) {
+            viewHolder.text.setTextColor(SPAM_TEXT_COLOR);
+        } else {
+            viewHolder.text.setTextColor(DEFAULT_TEXT_COLOR);
+        }
+    }
+
+    // ViewHolder pattern for better performance
+    private static class ViewHolder {
+        ImageView icon;
+        TextView text;
     }
 }
