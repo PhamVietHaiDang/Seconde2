@@ -89,7 +89,6 @@
                 android:id="@+id/txtSubject"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="mobileApp25-26: Postpone of Moodle test"
                 android:fontFamily="@font/open_sans"
                 android:textSize="20sp"
                 android:textStyle="bold"
@@ -120,7 +119,7 @@
                     android:background="@drawable/cr35bffffff"
                     android:contentDescription="Sender Avatar" />
 
-                <!-- 3-dot menu button for email content - MOVED HERE -->
+                <!-- 3-dot menu button for email content -->
                 <ImageButton
                     android:id="@+id/btnContentMenu"
                     android:layout_width="40dp"
@@ -140,7 +139,6 @@
                     android:layout_toStartOf="@id/btnContentMenu"
                     android:layout_centerVertical="true"
                     android:layout_marginEnd="8dp"
-                    android:text="3:41 PM • Sep 30, 2024"
                     android:fontFamily="@font/readexpro_medium"
                     android:textSize="12sp"
                     android:textColor="#7F7F7F" />
@@ -159,7 +157,6 @@
                         android:id="@+id/txtSender"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Son Tran Giang (via USTH Moodle)"
                         android:fontFamily="@font/readexpro_medium"
                         android:textSize="16sp"
                         android:textStyle="bold"
@@ -169,7 +166,6 @@
                         android:id="@+id/txtTo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="to: you@example.com"
                         android:fontFamily="@font/readexpro_medium"
                         android:textSize="14sp"
                         android:textColor="#7F7F7F"
@@ -187,16 +183,25 @@
                 android:layout_marginBottom="16dp" />
 
             <!-- 4. Email Content -->
+            <!-- Plain text content (for non-HTML emails) -->
             <TextView
                 android:id="@+id/txtBody"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Dear Students,\n\nThis is to inform you that the Moodle test for mobileApp25-26 has been postponed. The new date will be announced soon.\n\nPlease check the announcements forum for updates.\n\nBest regards,\nSon Tran Giang"
                 android:fontFamily="@font/readexpro_medium"
                 android:textSize="16sp"
                 android:textColor="#02110E"
                 android:lineSpacingExtra="4dp"
-                android:layout_marginBottom="24dp" />
+                android:layout_marginBottom="24dp"
+                android:visibility="visible" />
+
+            <!-- HTML content (for HTML emails) -->
+            <WebView
+                android:id="@+id/webViewBody"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:visibility="gone" />
 
             <!-- Divider line -->
             <View
@@ -205,7 +210,7 @@
                 android:background="#E0E0E0"
                 android:layout_marginBottom="16dp" />
 
-            <!-- 5. Rest of the conversation (placeholder for now) -->
+            <!-- 5. Rest of the conversation -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

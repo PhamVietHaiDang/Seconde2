@@ -12,11 +12,11 @@
         android:layout_width="79dp"
         android:layout_height="79dp"
         android:src="@drawable/logowtext"
-    android:contentDescription="@string/cd_logo"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    android:layout_marginTop="117dp" />
+        android:contentDescription="@string/cd_logo"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="117dp" />
 
     <!-- Title Sign In -->
     <TextView
@@ -161,11 +161,11 @@
         android:textSize="14sp"
         android:textStyle="bold"
         android:textColor="#6A1B9A"
-    android:gravity="end"
-    app:layout_constraintTop_toBottomOf="@id/cardPassword"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    android:layout_marginTop="12dp" />
+        android:gravity="end"
+        app:layout_constraintTop_toBottomOf="@id/cardPassword"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp" />
 
     <!-- Sign in button -->
     <TextView
@@ -178,9 +178,20 @@
         android:textColor="#FFFFFF"
         android:gravity="center"
         android:background="@drawable/button"
-    app:layout_constraintTop_toBottomOf="@id/tvForgot"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    android:layout_marginTop="24dp" />
+        app:layout_constraintTop_toBottomOf="@id/tvForgot"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp" />
+
+    <!-- Progress Bar - Fixed positioning -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/btnSignIn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

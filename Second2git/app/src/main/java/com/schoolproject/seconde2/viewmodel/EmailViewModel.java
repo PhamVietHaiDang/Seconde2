@@ -1,6 +1,8 @@
 package com.schoolproject.seconde2.viewmodel;
 
 import android.app.Application;
+import android.util.Log;
+import android.widget.Toast;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -19,11 +21,13 @@ public class EmailViewModel extends AndroidViewModel {
     private MutableLiveData<List<Email>> sentEmails = new MutableLiveData<>();
     private MutableLiveData<List<Email>> draftEmails = new MutableLiveData<>();
 
+    private static final String TAG = "EmailViewModel";
+
     public EmailViewModel(Application application) {
         super(application);
         repository = new EmailRepository(application);
 
-        // Initialize with empty lists
+        // Initialize with empty lists - NO SAMPLE DATA
         allEmails.setValue(new ArrayList<>());
         inboxEmails.setValue(new ArrayList<>());
         sentEmails.setValue(new ArrayList<>());
@@ -33,21 +37,25 @@ public class EmailViewModel extends AndroidViewModel {
     public void setCredentials(String email, String password) {
         this.userEmail = email;
         this.userPassword = password;
+        Log.d(TAG, "Credentials set for: " + email);
     }
 
     public LiveData<List<Email>> getAllEmails() {
         if (userEmail != null && userPassword != null) {
+            Log.d(TAG, "Getting real emails from database");
             return repository.getAllEmails();
         } else {
-            return allEmails;
+            Log.d(TAG, "No emails - user not signed in");
+            return allEmails; // Returns empty list
         }
     }
 
     public LiveData<List<Email>> getEmailsByFolder(String folder) {
+        Log.d(TAG, "Getting emails for folder: " + folder);
         if (userEmail != null && userPassword != null) {
             return repository.getEmailsByFolder(folder);
         } else {
-            // Return appropriate LiveData based on folder
+            // Return empty lists when not signed in - NO SAMPLE DATA
             switch (folder) {
                 case "inbox":
                     return inboxEmails;
@@ -62,60 +70,30 @@ public class EmailViewModel extends AndroidViewModel {
     }
 
     public void refreshEmails(String folder) {
+        Log.d(TAG, "Refreshing emails for folder: " + folder);
         if (userEmail != null && userPassword != null) {
-            // Use real email service
+            Log.d(TAG, "Calling repository to fetch emails for: " + folder);
             repository.fetchAndSaveEmails("imap.gmail.com", userEmail, userPassword, folder);
+            Toast.makeText(getApplication(), "Fetching " + folder + " emails...", Toast.LENGTH_SHORT).show();
         } else {
-            // Fallback to sample data if not signed in
-            loadSampleEmails(folder);
+            Log.d(TAG, "User not signed in - cannot refresh emails");
+            Toast.makeText(getApplication(), "Please sign in first", Toast.LENGTH_SHORT).show();
         }
     }
-
     public void sendEmail(String to, String subject, String body) {
         if (userEmail != null && userPassword != null) {
             repository.sendEmail("smtp.gmail.com", userEmail, userPassword, to, subject, body);
+            Toast.makeText(getApplication(), "Email sent!", Toast.LENGTH_SHORT).show();
         } else {
-            // If not signed in, just show success message but don't actually send
-            // You might want to handle this differently
-        }
-    }
-
-    private void loadSampleEmails(String folder) {
-        // Sample data fallback
-        List<Email> sampleEmails = new ArrayList<>();
-
-        switch (folder) {
-            case "inbox":
-                sampleEmails.add(new Email("USTH Administration", "Welcome to New Semester",
-                        "Dear students, welcome back to the new academic year...", "9:00 AM", "inbox"));
-                sampleEmails.add(new Email("Project Team", "Meeting About Mobile App Project",
-                        "Hi team, let's meet tomorrow to discuss the progress...", "2:30 PM", "inbox"));
-                inboxEmails.setValue(sampleEmails);
-                break;
-
-            case "sent":
-                sampleEmails.add(new Email("Professor Smith", "Homework Assignment 5 Submission",
-                        "Dear Professor, please find my homework assignment attached...", "8:15 AM", "sent"));
-                sampleEmails.add(new Email("Project Team", "Updated Design Mockups",
-                        "Hi team, I've updated the design mockups based on our discussion...", "3:45 PM", "sent"));
-                sentEmails.setValue(sampleEmails);
-                break;
-
-            case "draft":
-                // Empty drafts by default
-                draftEmails.setValue(new ArrayList<>());
-                break;
-        }
-
-        // Update all emails
-        List<Email> currentAll = allEmails.getValue();
-        if (currentAll != null) {
-            currentAll.addAll(sampleEmails);
-            allEmails.setValue(currentAll);
+            Toast.makeText(getApplication(), "Please sign in first", Toast.LENGTH_SHORT).show();
         }
     }
 
     public boolean isUserSignedIn() {
         return userEmail != null && userPassword != null;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
     }
 }

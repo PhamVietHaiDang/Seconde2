@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -30,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private View mainInboxContent;
     private View overlayContainer;
     private EmailViewModel emailViewModel;
+    private TextView navUserEmail;
 
     private String userEmail;
     private String userPassword;
@@ -44,15 +46,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize ViewModel
         emailViewModel = new ViewModelProvider(this).get(EmailViewModel.class);
 
         setupViews();
+        setupNavigationHeader();
         setupClickListeners();
         loadUserCredentials();
         checkOnboardingStatus();
-
-        // Observe emails
         observeEmails();
     }
 
@@ -64,12 +64,28 @@ public class MainActivity extends AppCompatActivity {
         overlayContainer = findViewById(R.id.overlay_container);
     }
 
+    private void setupNavigationHeader() {
+        View navDrawer = findViewById(R.id.nav_custom);
+        if (navDrawer != null) {
+            navUserEmail = navDrawer.findViewById(R.id.textView);
+        }
+
+        if (navUserEmail == null) {
+            navUserEmail = findViewById(R.id.textView);
+        }
+        updateNavigationHeader();
+    }
+
+    private void updateNavigationHeader() {
+        if (navUserEmail != null) {
+            navUserEmail.setText(userEmail != null ? userEmail : "user@example.com");
+        }
+    }
+
     private void setupClickListeners() {
         menuButton.setOnClickListener(v -> openNavigationDrawer());
         composeButton.setOnClickListener(v -> openComposeEmail());
-
         setupNavigationClicks();
-        setupEmailItemClicks();
     }
 
     private void loadUserCredentials() {
@@ -79,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (userEmail != null && userPassword != null) {
             emailViewModel.setCredentials(userEmail, userPassword);
+            updateNavigationHeader();
         }
     }
 
@@ -86,18 +103,44 @@ public class MainActivity extends AppCompatActivity {
         this.userEmail = email;
         this.userPassword = password;
 
-        // Store in SharedPreferences for persistence
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         prefs.edit()
                 .putString(KEY_USER_EMAIL, email)
                 .putString(KEY_USER_PASSWORD, password)
                 .apply();
 
-        // Update ViewModel with credentials
         emailViewModel.setCredentials(email, password);
+        updateNavigationHeader();
 
-        // Refresh emails after signing in
         refreshAllEmails();
+        showInboxFragment();
+
+        showToast("Signed in! Fetching your emails...");
+    }
+
+    private String extractNameFromEmail(String email) {
+        if (email == null || email.isEmpty()) return "User";
+
+        try {
+            String namePart = email.substring(0, email.indexOf('@'));
+            namePart = namePart.replaceAll("[^a-zA-Z]", " ").trim();
+
+            if (!namePart.isEmpty()) {
+                String[] words = namePart.split("\\s+");
+                StringBuilder formattedName = new StringBuilder();
+                for (String word : words) {
+                    if (!word.isEmpty()) {
+                        formattedName.append(Character.toUpperCase(word.charAt(0)))
+                                .append(word.substring(1).toLowerCase())
+                                .append(" ");
+                    }
+                }
+                return formattedName.toString().trim();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "User";
     }
 
     private void refreshAllEmails() {
@@ -105,15 +148,15 @@ public class MainActivity extends AppCompatActivity {
             emailViewModel.refreshEmails("inbox");
             emailViewModel.refreshEmails("sent");
             emailViewModel.refreshEmails("draft");
+            emailViewModel.refreshEmails("trash");
+            emailViewModel.refreshEmails("archive");
         }
     }
 
     private void observeEmails() {
-        // Observe all emails
         emailViewModel.getAllEmails().observe(this, emails -> {
             if (emails != null && !emails.isEmpty()) {
-                // Emails are available
-                Toast.makeText(this, "Loaded " + emails.size() + " emails", Toast.LENGTH_SHORT).show();
+                showToast("Loaded " + emails.size() + " emails");
             }
         });
     }
@@ -124,109 +167,55 @@ public class MainActivity extends AppCompatActivity {
 
         if (!onboardingDone) {
             showOnboardingFragment1();
+        } else if (userEmail != null && userPassword != null) {
+            showInboxFragment();
+            refreshAllEmails();
         } else {
-            // Check if user is already signed in
-            if (userEmail != null && userPassword != null) {
-                showMainInbox();
-                refreshAllEmails();
-            } else {
-                showSignInFragment();
-            }
+            showSignInFragment();
         }
     }
 
     private void setupNavigationClicks() {
-        findViewById(R.id.nav_inbox).setOnClickListener(v -> {
-            showMainInbox();
-            closeNavigationDrawer();
-            if (userEmail != null) {
-                emailViewModel.refreshEmails("inbox");
-            }
-        });
+        int[] navIds = {
+                R.id.nav_inbox, R.id.nav_draft, R.id.nav_sent, R.id.nav_trash,
+                R.id.nav_outlook, R.id.nav_all_mail, R.id.nav_contracts, R.id.nav_settings
+        };
 
-        findViewById(R.id.nav_draft).setOnClickListener(v -> {
-            showFragment(new com.schoolproject.seconde2.EmailFragments.DraftFragment());
-            closeNavigationDrawer();
-            if (userEmail != null) {
-                emailViewModel.refreshEmails("draft");
-            }
-        });
+        Class<?>[] fragmentClasses = {
+                com.schoolproject.seconde2.EmailFragments.InboxFragment.class,
+                com.schoolproject.seconde2.EmailFragments.DraftFragment.class,
+                com.schoolproject.seconde2.EmailFragments.SentFragment.class,
+                com.schoolproject.seconde2.EmailFragments.TrashFragment.class,
+                com.schoolproject.seconde2.EmailFragments.OutlookFragment.class,
+                com.schoolproject.seconde2.EmailFragments.AllMailFragment.class,
+                ContractsFragment.class,
+                SettingsFragment.class
+        };
 
-        findViewById(R.id.nav_sent).setOnClickListener(v -> {
-            showFragment(new com.schoolproject.seconde2.EmailFragments.SentFragment());
-            closeNavigationDrawer();
-            if (userEmail != null) {
-                emailViewModel.refreshEmails("sent");
-            }
-        });
+        boolean[] showComposeButton = {true, true, true, true, true, true, true, false};
 
-        findViewById(R.id.nav_trash).setOnClickListener(v -> {
-            showFragment(new com.schoolproject.seconde2.EmailFragments.TrashFragment());
-            closeNavigationDrawer();
-        });
-
-        findViewById(R.id.nav_outlook).setOnClickListener(v -> {
-            showFragment(new com.schoolproject.seconde2.EmailFragments.OutlookFragment());
-            closeNavigationDrawer();
-        });
-
-        findViewById(R.id.nav_all_mail).setOnClickListener(v -> {
-            showFragment(new com.schoolproject.seconde2.EmailFragments.AllMailFragment());
-            closeNavigationDrawer();
-        });
-
-        findViewById(R.id.nav_contracts).setOnClickListener(v -> {
-            showFragment(new ContractsFragment());
-            closeNavigationDrawer();
-        });
-
-        findViewById(R.id.nav_settings).setOnClickListener(v -> {
-            showFragment(new SettingsFragment(), false);
-            closeNavigationDrawer();
-        });
-    }
-
-    private void setupEmailItemClicks() {
-        findViewById(R.id.rel5em68e47i).setOnClickListener(v -> {
-            openEmailDetail(
-                    "Son Tran Giang (via USTH Moodle)",
-                    "mobileApp25-26: Postpone of Moodle test",
-                    "3:41 PM • Sep 30, 2024",
-                    "you@example.com",
-                    "Dear Students,\n\nThis is to inform you that the Moodle test for mobileApp25-26 has been postponed. The new date will be announced soon.\n\nPlease check the announcements forum for updates.\n\nBest regards,\nSon Tran Giang"
-            );
-        });
-
-        findViewById(R.id.rommwk8vbiz).setOnClickListener(v -> {
-            openEmailDetail(
-                    "Minh Hoang (via Google Drive)",
-                    "Share request for \"MOBILE\"",
-                    "Sep 30, 2024 • 2:15 PM",
-                    "you@example.com",
-                    "I would like to share the MOBILE folder with you. Please accept the share request to access the materials.\n\nThe folder contains all the necessary resources for our mobile development project. You'll find the source code, documentation, and design assets.\n\nBest regards,\nMinh Hoang"
-            );
-        });
-
-        findViewById(R.id.rqkb0gxkystq).setOnClickListener(v -> {
-            openEmailDetail(
-                    "Milano",
-                    "Part 8 of 8: Missions Complete",
-                    "Sep 30, 2024 • 10:30 AM",
-                    "melancholia@example.com",
-                    "Dear Melancholia,\n\nYou have completed the final mission. Congratulations on your achievement!\n\nAll missions are now complete. Thank you for your participation and dedication throughout this journey. Your performance has been exceptional.\n\nWe will be in touch soon regarding your next assignment.\n\nSincerely,\nMilano Team"
-            );
-        });
+        for (int i = 0; i < navIds.length; i++) {
+            final int index = i;
+            findViewById(navIds[i]).setOnClickListener(v -> {
+                try {
+                    Fragment fragment = (Fragment) fragmentClasses[index].newInstance();
+                    showFragment(fragment, showComposeButton[index]);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                closeNavigationDrawer();
+            });
+        }
     }
 
     private void openComposeEmail() {
-        if (userEmail == null || userPassword == null) {
-            Toast.makeText(this, "Please sign in first", Toast.LENGTH_SHORT).show();
+        if (userEmail == null || userPassword != null) {
+            showToast("Please sign in first");
             showSignInFragment();
             return;
         }
 
-        Intent composeIntent = new Intent(this, ComposeEmailActivity.class);
-        startActivity(composeIntent);
+        startActivity(new Intent(this, ComposeEmailActivity.class));
     }
 
     private void closeNavigationDrawer() {
@@ -249,12 +238,12 @@ public class MainActivity extends AppCompatActivity {
         showOverlayFragment(new SignInFragment(), false);
     }
 
-    public void showMainInbox() {
-        mainInboxContent.setVisibility(View.VISIBLE);
-        overlayContainer.setVisibility(View.GONE);
-        composeButton.setVisibility(View.VISIBLE);
+    public void showInboxFragment() {
+        showFragment(new com.schoolproject.seconde2.EmailFragments.InboxFragment());
+    }
 
-        markOnboardingCompleted();
+    public void showMainInbox() {
+        showInboxFragment();
     }
 
     private void showFragment(Fragment fragment) {
@@ -270,24 +259,18 @@ public class MainActivity extends AppCompatActivity {
         overlayContainer.setVisibility(View.VISIBLE);
         composeButton.setVisibility(showComposeButton ? View.VISIBLE : View.GONE);
 
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.overlay_container, fragment);
-        transaction.commit();
-    }
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.overlay_container, fragment)
+                .commit();
 
-    private void openEmailDetail(String sender, String subject, String date, String to, String body) {
-        Intent emailDetailIntent = new Intent(this, EmailDetailActivity.class);
-        emailDetailIntent.putExtra("sender", sender);
-        emailDetailIntent.putExtra("subject", subject);
-        emailDetailIntent.putExtra("date", date);
-        emailDetailIntent.putExtra("to", to);
-        emailDetailIntent.putExtra("body", body);
-        startActivity(emailDetailIntent);
+        markOnboardingCompleted();
+        updateNavigationHeader();
     }
 
     public void openNavigationDrawer() {
         if (drawerLayout != null) {
             drawerLayout.openDrawer(findViewById(R.id.nav_custom));
+            updateNavigationHeader();
         }
     }
 
@@ -307,10 +290,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public String getCurrentFragment() {
-        if (mainInboxContent.getVisibility() == View.VISIBLE) {
-            return "inbox";
-        }
-        return "unknown";
+        return mainInboxContent.getVisibility() == View.VISIBLE ? "legacy_inbox" : "fragment_inbox";
     }
 
     public String getUserEmail() {
@@ -319,5 +299,9 @@ public class MainActivity extends AppCompatActivity {
 
     public boolean isUserSignedIn() {
         return userEmail != null && userPassword != null;
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

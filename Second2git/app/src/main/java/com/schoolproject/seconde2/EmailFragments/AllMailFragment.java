@@ -1,95 +1,100 @@
 package com.schoolproject.seconde2.EmailFragments;
 
+import android.util.Log;
+import android.widget.Toast;
 import android.content.Intent;
-import android.view.View;
 
-import com.schoolproject.seconde2.activities.EmailDetailActivity;
 import com.schoolproject.seconde2.BaseEmailFragment.EmailListFragment;
 import com.schoolproject.seconde2.model.Email;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class AllMailFragment extends EmailListFragment {
 
     @Override
     protected void loadEmailData() {
         setFolderTitle("All Mail");
+        Log.d("AllMailFragment", "Loading all mail data, signed in: " + emailViewModel.isUserSignedIn());
 
-        // Observe all emails from database
-        observeEmails(null); // null will get all emails
+        if (emailViewModel.isUserSignedIn()) {
+            refreshAllFolders();
+        } else {
+            showNoDataScreen("Sign In Required", "Please sign in to view all your emails");
+        }
     }
 
-    @Override
-    protected void observeEmails(String folder) {
-        // Override to get all emails regardless of folder
-        emailViewModel.getAllEmails().observe(getViewLifecycleOwner(), emails -> {
-            if (emails != null && !emails.isEmpty()) {
-                displayEmails(emails);
+    private void refreshAllFolders() {
+        emailViewModel.refreshEmails("inbox");
+        emailViewModel.refreshEmails("sent");
+        emailViewModel.refreshEmails("draft");
+        emailViewModel.refreshEmails("archive");
+        Toast.makeText(getContext(), "Fetching all your emails...", Toast.LENGTH_SHORT).show();
+        observeAllEmails();
+    }
+
+    private void observeAllEmails() {
+        emailViewModel.getAllEmails().observe(getViewLifecycleOwner(), allEmails -> {
+            if (allEmails != null && !allEmails.isEmpty()) {
+                List<Email> filteredEmails = filterOutTrashAndDuplicates(allEmails);
+                if (!filteredEmails.isEmpty()) {
+                    displayEmails(filteredEmails);
+                } else {
+                    showNoDataScreen("No Emails Found", "No emails found in your account (excluding trash)");
+                }
             } else {
-                loadSampleEmails("all");
+                showNoDataScreen("No Emails", "No emails found in your account");
             }
         });
     }
 
+    private List<Email> filterOutTrashAndDuplicates(List<Email> allEmails) {
+        List<Email> filtered = new ArrayList<>();
+        Set<String> seenEmails = new HashSet<>();
+
+        for (Email email : allEmails) {
+            if ("trash".equalsIgnoreCase(email.folder)) continue;
+
+            String emailKey = email.sender + "|" + email.subject + "|" + email.date;
+            if (!seenEmails.contains(emailKey)) {
+                filtered.add(email);
+                seenEmails.add(emailKey);
+            }
+        }
+        return filtered;
+    }
+
+    @Override
+    protected void observeEmails(String folder) {
+        // Not used
+    }
+
     @Override
     protected void loadSampleEmails(String folder) {
-        loadAllEmailCategories();
-    }
-
-    private void loadAllEmailCategories() {
-        addInboxEmails();
-        addSentEmails();
-        addTrashEmails();
-    }
-
-    private void addInboxEmails() {
-        addEmail("Mom", "How are you doing?",
-                "Hi son, just checking in to see how you're doing with your studies...",
-                "INBOX • 5:20 PM",
-                "Hi son,\n\nJust checking in to see how you're doing with your studies. Are you eating well?\n\nLove,\nMom");
-    }
-
-    private void addSentEmails() {
-        addEmail("Professor Smith", "Homework Assignment 5 Submission",
-                "Dear Professor, please find my homework assignment attached...",
-                "SENT • 8:15 AM",
-                "Dear Professor,\n\nPlease find my homework assignment 5 attached to this email.\n\nI completed all the problems and included detailed explanations for problem 4.\n\nThank you!");
-    }
-
-    private void addTrashEmails() {
-        addEmail("Super Discount Store", "50% OFF Everything Today Only!",
-                "Limited time offer! Get 50% off all items in our store...",
-                "TRASH • Today",
-                "Limited time offer! Get 50% off all items in our store today only!\n\nUse code: SAVE50\n\nHurry, offer ends tonight at midnight!");
-    }
-
-    private void addEmail(String sender, String emailSubject, String previewText, String timestamp, String emailBody) {
-        addEmailToList(sender, emailSubject, previewText, timestamp,
-                view -> openEmailDetails(sender, emailSubject, formatDate(timestamp), "user@example.com", emailBody));
+        showNoDataScreen("Sign In Required", "Please sign in to view all your emails");
     }
 
     @Override
     protected void openEmailDetails(Email email) {
         if (getActivity() == null) return;
 
-        Intent emailDetailIntent = new Intent(getActivity(), EmailDetailActivity.class);
-        emailDetailIntent.putExtra("sender", email.sender);
-        emailDetailIntent.putExtra("subject", email.subject);
-        emailDetailIntent.putExtra("date", email.date);
-        emailDetailIntent.putExtra("to", "user@example.com");
-        emailDetailIntent.putExtra("body", email.body);
-
-        startActivity(emailDetailIntent);
+        Intent intent = createEmailDetailIntent(email);
+        startActivity(intent);
     }
 
-    private void openEmailDetails(String senderName, String emailSubject, String emailDate, String recipient, String emailBody) {
-        if (getActivity() == null) return;
+    @Override
+    protected void refreshEmails() {
+        if (emailViewModel.isUserSignedIn()) {
+            refreshAllFolders();
+        } else {
+            Toast.makeText(getContext(), "Please sign in to refresh emails", Toast.LENGTH_SHORT).show();
+        }
+    }
 
-        Intent emailDetailIntent = new Intent(getActivity(), EmailDetailActivity.class);
-        emailDetailIntent.putExtra("sender", senderName);
-        emailDetailIntent.putExtra("subject", emailSubject);
-        emailDetailIntent.putExtra("date", emailDate);
-        emailDetailIntent.putExtra("to", recipient);
-        emailDetailIntent.putExtra("body", emailBody);
-
-        startActivity(emailDetailIntent);
+    @Override
+    protected String getCurrentFolder() {
+        return "all";
     }
 }

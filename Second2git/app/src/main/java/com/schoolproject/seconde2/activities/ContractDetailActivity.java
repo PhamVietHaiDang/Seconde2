@@ -17,22 +17,18 @@ import java.lang.reflect.Method;
 
 public class ContractDetailActivity extends AppCompatActivity {
 
-    // Menu item IDs
     private static final int MENU_ADD_DETAILS = 1;
     private static final int MENU_FAVORITE = 2;
     private static final int MENU_COPY_DETAILS = 3;
     private static final int MENU_COMPOSE_EMAIL = 4;
 
-    // Intent extra keys
     private static final String EXTRA_PHONE_NUMBER = "phone_number";
     private static final String EXTRA_EMAIL_ADDRESS = "email_address";
     private static final String EXTRA_PREFILLED_TO = "prefilled_to";
 
-    // UI components
     private ImageButton backButton, menuButton;
     private TextView phoneNumberText, emailAddressText;
 
-    // Contact data
     private String contactPhone, contactEmail;
 
     @Override
@@ -53,30 +49,22 @@ public class ContractDetailActivity extends AppCompatActivity {
     }
 
     private void loadContactData() {
-        // Try to get real data first
         if (!loadDataFromIntent()) {
-            // Fall back to sample data
             setupSampleData();
         }
     }
 
     private boolean loadDataFromIntent() {
         Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            contactPhone = extras.getString(EXTRA_PHONE_NUMBER);
-            contactEmail = extras.getString(EXTRA_EMAIL_ADDRESS);
+        if (extras == null) return false;
 
-            // Update UI with real data
-            if (contactPhone != null) {
-                phoneNumberText.setText(contactPhone);
-            }
-            if (contactEmail != null) {
-                emailAddressText.setText(contactEmail);
-            }
+        contactPhone = extras.getString(EXTRA_PHONE_NUMBER);
+        contactEmail = extras.getString(EXTRA_EMAIL_ADDRESS);
 
-            return contactPhone != null || contactEmail != null;
-        }
-        return false;
+        if (contactPhone != null) phoneNumberText.setText(contactPhone);
+        if (contactEmail != null) emailAddressText.setText(contactEmail);
+
+        return contactPhone != null || contactEmail != null;
     }
 
     private void setupSampleData() {
@@ -98,7 +86,6 @@ public class ContractDetailActivity extends AppCompatActivity {
         PopupMenu popupMenu = new PopupMenu(this, view);
         Menu menu = popupMenu.getMenu();
 
-        // Add menu items
         menu.add(0, MENU_ADD_DETAILS, 0, "Add details").setIcon(R.drawable.ic_add);
         menu.add(0, MENU_FAVORITE, 1, "Mark as favorite").setIcon(R.drawable.ic_favorite);
         menu.add(0, MENU_COPY_DETAILS, 2, "Copy details").setIcon(R.drawable.ic_copy);
@@ -119,7 +106,7 @@ public class ContractDetailActivity extends AppCompatActivity {
             Method setForceShowIcon = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
             setForceShowIcon.invoke(menuPopupHelper, true);
         } catch (Exception e) {
-            // Menu will work without icons if reflection fails
+            // Menu icons may not show if reflection fails
         }
     }
 
@@ -141,13 +128,11 @@ public class ContractDetailActivity extends AppCompatActivity {
     }
 
     private void addContactDetails() {
-        Toast.makeText(this, "Add contact details", Toast.LENGTH_SHORT).show();
-        // TODO: Implement add details logic
+        showToast("Add contact details");
     }
 
     private void markAsFavorite() {
-        Toast.makeText(this, "Contact marked as favorite", Toast.LENGTH_SHORT).show();
-        // TODO: Implement favorite functionality
+        showToast("Contact marked as favorite");
     }
 
     private void copyContactDetails() {
@@ -157,7 +142,7 @@ public class ContractDetailActivity extends AppCompatActivity {
         android.content.ClipData clip = android.content.ClipData.newPlainText("Contact details", contactInfo);
         clipboard.setPrimaryClip(clip);
 
-        Toast.makeText(this, "Contact details copied", Toast.LENGTH_SHORT).show();
+        showToast("Contact details copied");
     }
 
     private void composeEmail() {
@@ -169,18 +154,17 @@ public class ContractDetailActivity extends AppCompatActivity {
     }
 
     private void handlePhoneClick() {
-        String phoneNumber = phoneNumberText.getText().toString();
-        Toast.makeText(this, "Calling: " + phoneNumber, Toast.LENGTH_SHORT).show();
-        // TODO: Implement phone call functionality
+        showToast("Calling: " + phoneNumberText.getText());
     }
 
     private void handleEmailClick() {
-        String emailAddress = emailAddressText.getText().toString();
-        Toast.makeText(this, "Sending email to: " + emailAddress, Toast.LENGTH_SHORT).show();
-        // TODO: Implement email functionality
+        showToast("Sending email to: " + emailAddressText.getText());
     }
 
-    // Helper methods for backend integration
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
     public String getContactPhone() {
         return contactPhone;
     }
@@ -196,11 +180,7 @@ public class ContractDetailActivity extends AppCompatActivity {
     }
 
     private void updateContactDisplay() {
-        if (contactPhone != null) {
-            phoneNumberText.setText(contactPhone);
-        }
-        if (contactEmail != null) {
-            emailAddressText.setText(contactEmail);
-        }
+        if (contactPhone != null) phoneNumberText.setText(contactPhone);
+        if (contactEmail != null) emailAddressText.setText(contactEmail);
     }
 }

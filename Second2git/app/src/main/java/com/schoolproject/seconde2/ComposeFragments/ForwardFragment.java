@@ -28,7 +28,6 @@ public class ForwardFragment extends Fragment {
     private String originalDate;
     private String originalBody;
 
-    // Constants for email configuration
     private static final String EMAIL_APP_PASSWORD = "your-app-password";
     private static final String FORWARD_PREFIX = "Fwd: ";
 

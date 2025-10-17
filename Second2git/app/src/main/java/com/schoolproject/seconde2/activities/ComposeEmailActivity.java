@@ -33,7 +33,6 @@ public class ComposeEmailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_compose_email);
 
-        // CORRECT ViewModel initialization
         emailViewModel = new ViewModelProvider(this).get(EmailViewModel.class);
 
         findViews();
@@ -55,7 +54,6 @@ public class ComposeEmailActivity extends AppCompatActivity {
         sendIconButton = findViewById(R.id.btnSendIcon);
         settingsButton = findViewById(R.id.btnSettings);
         expandToButton = findViewById(R.id.btnExpandTo);
-
         loadingBar = findViewById(R.id.progressBar);
 
         ccField.setVisibility(View.GONE);
@@ -65,37 +63,32 @@ public class ComposeEmailActivity extends AppCompatActivity {
     private void setupButtons() {
         sendButton.setOnClickListener(v -> sendEmail());
         sendIconButton.setOnClickListener(v -> sendEmail());
-        exitButton.setOnClickListener(v -> closeScreen());
+        exitButton.setOnClickListener(v -> finish());
         attachButton.setOnClickListener(v -> showToast("Attachment feature coming soon!"));
         settingsButton.setOnClickListener(v -> showSettings());
         expandToButton.setOnClickListener(v -> toggleCcBcc());
     }
 
     private void prefillFields() {
-        // Use actual user email from SharedPreferences
         SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
         String userEmail = prefs.getString("user_email", "");
         fromField.setText(userEmail.isEmpty() ? "you@example.com" : userEmail);
 
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("prefilled_to")) {
-            String emails = intent.getStringExtra("prefilled_to");
-            toField.setText(emails);
+            toField.setText(intent.getStringExtra("prefilled_to"));
         }
     }
 
     private void toggleCcBcc() {
         areCcBccVisible = !areCcBccVisible;
 
-        if (areCcBccVisible) {
-            ccField.setVisibility(View.VISIBLE);
-            bccField.setVisibility(View.VISIBLE);
-            expandToButton.setImageResource(R.drawable.ic_arrow_drop_up);
-        } else {
-            ccField.setVisibility(View.GONE);
-            bccField.setVisibility(View.GONE);
-            expandToButton.setImageResource(R.drawable.ic_arrow_drop_down);
-        }
+        int visibility = areCcBccVisible ? View.VISIBLE : View.GONE;
+        int icon = areCcBccVisible ? R.drawable.ic_arrow_drop_up : R.drawable.ic_arrow_drop_down;
+
+        ccField.setVisibility(visibility);
+        bccField.setVisibility(visibility);
+        expandToButton.setImageResource(icon);
     }
 
     private void showSettings() {
@@ -123,18 +116,14 @@ public class ComposeEmailActivity extends AppCompatActivity {
     }
 
     private void saveDraft() {
-        if (hasContent()) {
-            showToast("Draft saved!");
-        } else {
-            showToast("No content to save");
-        }
+        showToast(hasContent() ? "Draft saved!" : "No content to save");
     }
 
     private void discardEmail() {
         if (hasContent()) {
             showDiscardDialog();
         } else {
-            closeScreen();
+            finish();
         }
     }
 
@@ -142,7 +131,7 @@ public class ComposeEmailActivity extends AppCompatActivity {
         new android.app.AlertDialog.Builder(this)
                 .setTitle("Discard Email")
                 .setMessage("Are you sure? Your changes will be lost.")
-                .setPositiveButton("Discard", (dialog, which) -> closeScreen())
+                .setPositiveButton("Discard", (dialog, which) -> finish())
                 .setNegativeButton("Keep Editing", null)
                 .show();
     }
@@ -155,35 +144,34 @@ public class ComposeEmailActivity extends AppCompatActivity {
         String subject = subjectField.getText().toString().trim();
         String body = messageField.getText().toString().trim();
 
+        // Validate required fields
         if (from.isEmpty() || to.isEmpty() || subject.isEmpty() || body.isEmpty()) {
             showToast("Please fill all required fields");
             return;
         }
 
+        // Validate email formats
         if (!areEmailsValid(to)) {
             showToast("Please check the email addresses in 'To' field");
             return;
         }
-
         if (!cc.isEmpty() && !areEmailsValid(cc)) {
             showToast("Please check the email addresses in 'CC' field");
             return;
         }
-
         if (!bcc.isEmpty() && !areEmailsValid(bcc)) {
             showToast("Please check the email addresses in 'BCC' field");
             return;
         }
 
-        // Check if user is signed in
+        // Check user authentication
         SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
         String userEmail = prefs.getString("user_email", "");
         String userPassword = prefs.getString("user_password", "");
 
         if (userEmail.isEmpty() || userPassword.isEmpty()) {
             showToast("Please sign in first");
-            Intent signInIntent = new Intent(this, MainActivity.class);
-            startActivity(signInIntent);
+            startActivity(new Intent(this, MainActivity.class));
             return;
         }
 
@@ -196,57 +184,34 @@ public class ComposeEmailActivity extends AppCompatActivity {
 
         String[] emailArray = emails.split(",");
         for (String email : emailArray) {
-            String trimmedEmail = email.trim();
-            if (!isValidEmail(trimmedEmail)) {
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()) {
                 return false;
             }
         }
         return true;
     }
 
-    private boolean isValidEmail(String email) {
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
-    }
-
     private void sendEmailToServer(String from, String to, String cc, String bcc, String subject, String body) {
         // Build recipient list
         StringBuilder allRecipients = new StringBuilder(to);
+        if (!cc.isEmpty()) allRecipients.append(",").append(cc);
+        if (!bcc.isEmpty()) allRecipients.append(",").append(bcc);
 
-        if (!cc.isEmpty()) {
-            allRecipients.append(",").append(cc);
-        }
-        if (!bcc.isEmpty()) {
-            allRecipients.append(",").append(bcc);
-        }
-
-        // Use ViewModel to send email
         emailViewModel.sendEmail(allRecipients.toString(), subject, body);
 
-        // Show success
+        // Simulate email sending
         new Handler().postDelayed(() -> {
             setLoading(false);
 
-            int recipientCount = countRecipients(to, cc, bcc);
-            showToast("Email sent to " + recipientCount + " people!");
+            // Count recipients for success message
+            int count = 0;
+            if (!to.isEmpty()) count += to.split(",").length;
+            if (!cc.isEmpty()) count += cc.split(",").length;
+            if (!bcc.isEmpty()) count += bcc.split(",").length;
 
-            closeScreen();
+            showToast("Email sent to " + count + " people!");
+            finish();
         }, 2000);
-    }
-
-    private int countRecipients(String to, String cc, String bcc) {
-        int count = 0;
-
-        if (!to.isEmpty()) {
-            count += to.split(",").length;
-        }
-        if (!cc.isEmpty()) {
-            count += cc.split(",").length;
-        }
-        if (!bcc.isEmpty()) {
-            count += bcc.split(",").length;
-        }
-
-        return count;
     }
 
     private boolean hasContent() {
@@ -260,17 +225,14 @@ public class ComposeEmailActivity extends AppCompatActivity {
 
     private void setLoading(boolean loading) {
         loadingBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+        boolean enabled = !loading;
 
-        sendButton.setEnabled(!loading);
-        sendIconButton.setEnabled(!loading);
-        exitButton.setEnabled(!loading);
-        attachButton.setEnabled(!loading);
-        settingsButton.setEnabled(!loading);
-        expandToButton.setEnabled(!loading);
-    }
-
-    private void closeScreen() {
-        finish();
+        sendButton.setEnabled(enabled);
+        sendIconButton.setEnabled(enabled);
+        exitButton.setEnabled(enabled);
+        attachButton.setEnabled(enabled);
+        settingsButton.setEnabled(enabled);
+        expandToButton.setEnabled(enabled);
     }
 
     private void showToast(String message) {

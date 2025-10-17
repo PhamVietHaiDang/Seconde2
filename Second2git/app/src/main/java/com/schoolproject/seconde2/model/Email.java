@@ -21,34 +21,43 @@ public class Email {
     @ColumnInfo(name = "date")
     public String date;
 
+    @ColumnInfo(name = "timestamp")
+    public long timestamp = System.currentTimeMillis();
+
     @ColumnInfo(name = "folder")
-    public String folder = "inbox"; // inbox, sent, draft, trash
+    public String folder = "inbox";
 
     @ColumnInfo(name = "is_read")
     public boolean isRead = false;
 
-    // Default constructor (required by Room)
-    public Email() {
-    }
+    // Add these new fields for HTML support
+    @ColumnInfo(name = "html_content")
+    public String htmlContent;
 
-    // Constructor for creating sample emails (without id)
+    @ColumnInfo(name = "is_html")
+    public boolean isHtml = false;
+
+    public Email() {}
+
+    // Main constructor
     public Email(String sender, String subject, String body, String date, String folder) {
         this.sender = sender;
         this.subject = subject;
         this.body = body;
         this.date = date;
         this.folder = folder;
-        this.isRead = false; // default value
     }
 
-    // Optional: Constructor with all fields including id
+    // Constructor with ID
     public Email(int id, String sender, String subject, String body, String date, String folder, boolean isRead) {
+        this(sender, subject, body, date, folder);
         this.id = id;
-        this.sender = sender;
-        this.subject = subject;
-        this.body = body;
-        this.date = date;
-        this.folder = folder;
         this.isRead = isRead;
+    }
+
+    // Constructor with timestamp
+    public Email(String sender, String subject, String body, String date, long timestamp, String folder) {
+        this(sender, subject, body, date, folder);
+        this.timestamp = timestamp;
     }
 }
