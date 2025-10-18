@@ -1,11 +1,28 @@
 package com.schoolproject.seconde2.BaseEmailFragment;
 
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.schoolproject.seconde2.R;
+import com.schoolproject.seconde2.activities.ComposeEmailActivity;
+import com.schoolproject.seconde2.activities.MainActivity;
 import com.schoolproject.seconde2.activities.EmailDetailActivity;
 import com.schoolproject.seconde2.model.Email;
+import com.schoolproject.seconde2.viewmodel.EmailViewModel;
+
+import java.util.List;
 
 public abstract class BaseEmailFragment extends EmailListFragment {
 
@@ -18,9 +35,31 @@ public abstract class BaseEmailFragment extends EmailListFragment {
         Log.d(getFragmentTag(), "Loading " + getFolderName() + " data, signed in: " + emailViewModel.isUserSignedIn());
 
         if (emailViewModel.isUserSignedIn()) {
+            // Show loading state immediately for better UX
+            showNoDataScreen("Loading", "Fetching your " + getFolderName() + " emails...");
+
             Log.d(getFragmentTag(), "User is signed in, refreshing " + getFolderName() + " emails");
             emailViewModel.refreshEmails(getFolderName());
+
+            // Start observing emails immediately
+            observeEmails(getFolderName());
+        } else {
+            showNoDataScreen("Sign In Required", "Please sign in to view your " + getFolderName() + " emails");
+        }
+    }
+
+    // SIMPLIFIED: Remove the complex callback approach
+    protected void loadEmailDataWithProgress() {
+        setFolderTitle(getFolderName());
+
+        if (emailViewModel.isUserSignedIn()) {
+            // Show loading state immediately
             showNoDataScreen("Loading", "Fetching your " + getFolderName() + " emails...");
+
+            // Use the simpler refresh method
+            emailViewModel.refreshEmails(getFolderName());
+
+            // Start observing emails
             observeEmails(getFolderName());
         } else {
             showNoDataScreen("Sign In Required", "Please sign in to view your " + getFolderName() + " emails");
@@ -29,23 +68,26 @@ public abstract class BaseEmailFragment extends EmailListFragment {
 
     @Override
     protected void observeEmails(String folder) {
-        emailViewModel.getEmailsByFolder(folder).observe(getViewLifecycleOwner(), emails -> {
-            Log.d(getFragmentTag(), getFolderName() + " emails observed: " + (emails != null ? emails.size() : "null"));
+        // Check if fragment is still alive before observing
+        if (getViewLifecycleOwner().getLifecycle().getCurrentState().isAtLeast(androidx.lifecycle.Lifecycle.State.INITIALIZED)) {
+            emailViewModel.getEmailsByFolder(folder).observe(getViewLifecycleOwner(), emails -> {
+                Log.d(getFragmentTag(), getFolderName() + " emails observed: " + (emails != null ? emails.size() : "null"));
 
-            setRefreshing(false);
+                setRefreshing(false);
 
-            if (emails != null && !emails.isEmpty()) {
-                Log.d(getFragmentTag(), "Displaying " + emails.size() + " " + getFolderName() + " emails");
-                displayEmails(emails);
-            } else {
-                Log.d(getFragmentTag(), "No " + getFolderName() + " emails found");
-                if (emailViewModel.isUserSignedIn()) {
-                    showNoDataScreen("Empty " + getFolderName(), "No emails found in your " + getFolderName());
+                if (emails != null && !emails.isEmpty()) {
+                    Log.d(getFragmentTag(), "Displaying " + emails.size() + " " + getFolderName() + " emails");
+                    displayEmails(emails);
                 } else {
-                    showNoDataScreen("Sign In Required", "Please sign in to view your " + getFolderName() + " emails");
+                    Log.d(getFragmentTag(), "No " + getFolderName() + " emails found");
+                    if (emailViewModel.isUserSignedIn()) {
+                        showNoDataScreen("Empty " + getFolderName(), "No emails found in your " + getFolderName());
+                    } else {
+                        showNoDataScreen("Sign In Required", "Please sign in to view your " + getFolderName() + " emails");
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     @Override
@@ -56,17 +98,6 @@ public abstract class BaseEmailFragment extends EmailListFragment {
     @Override
     protected void openEmailDetails(Email email) {
         if (getActivity() == null) return;
-
-        // DEBUG: Log what we're sending
-        System.out.println("DEBUG " + getFragmentTag() + " - Sending email data:");
-        System.out.println("Sender: " + email.sender);
-        System.out.println("Subject: " + email.subject);
-        System.out.println("Date: " + email.date);
-        System.out.println("Body: " + (email.body != null ? email.body.substring(0, Math.min(50, email.body.length())) + "..." : "null"));
-        System.out.println("HTML Content: " + (email.htmlContent != null ? "Available, length: " + email.htmlContent.length() : "null"));
-        System.out.println("Is HTML: " + email.isHtml);
-        System.out.println("Folder: " + email.folder);
-        System.out.println("ID: " + email.id);
 
         Intent intent = new Intent(getActivity(), EmailDetailActivity.class);
         intent.putExtra("sender", email.sender);

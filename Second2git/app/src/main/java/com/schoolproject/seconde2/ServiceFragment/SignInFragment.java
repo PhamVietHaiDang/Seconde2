@@ -1,6 +1,8 @@
 package com.schoolproject.seconde2;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +14,16 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.Task;
 import com.schoolproject.seconde2.R;
 import com.schoolproject.seconde2.activities.MainActivity;
 
-import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import java.util.Properties;
@@ -26,7 +34,12 @@ public class SignInFragment extends Fragment {
     private ImageView passwordToggle;
     private ProgressBar progressBar;
     private TextView signInButton;
+    private com.google.android.gms.common.SignInButton googleSignInButton;
     private boolean isPasswordVisible = false;
+
+    // Google Sign-In
+    private GoogleSignInClient googleSignInClient;
+    private static final int RC_SIGN_IN = 9001;
 
     @Nullable
     @Override
@@ -34,10 +47,14 @@ public class SignInFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_sign_in, container, false);
+
         setupViews(view);
+        setupGoogleSignIn();
         setupSignInButton();
         setupPasswordToggle();
         setupForgotPassword(view);
+        setupGoogleSignInButton();
+
         return view;
     }
 
@@ -47,14 +64,29 @@ public class SignInFragment extends Fragment {
         passwordToggle = view.findViewById(R.id.ivTogglePassword);
         progressBar = view.findViewById(R.id.progressBar);
         signInButton = view.findViewById(R.id.btnSignIn);
+        googleSignInButton = view.findViewById(R.id.btnGoogleSignIn);
 
         if (progressBar != null) {
             progressBar.setVisibility(View.GONE);
         }
     }
 
+    private void setupGoogleSignIn() {
+        // Configure Google Sign In
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestIdToken(getString(R.string.default_web_client_id)) // Make sure this string exists
+                .build();
+
+        googleSignInClient = GoogleSignIn.getClient(requireContext(), gso);
+    }
+
     private void setupSignInButton() {
         signInButton.setOnClickListener(v -> handleSignIn());
+    }
+
+    private void setupGoogleSignInButton() {
+        googleSignInButton.setOnClickListener(v -> signInWithGoogle());
     }
 
     private void setupPasswordToggle() {
@@ -92,6 +124,68 @@ public class SignInFragment extends Fragment {
         }
 
         authenticateUser(email, password);
+    }
+
+    private void signInWithGoogle() {
+        showLoading(true);
+        Intent signInIntent = googleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            handleGoogleSignInResult(task);
+        }
+    }
+
+    private void handleGoogleSignInResult(Task<GoogleSignInAccount> completedTask) {
+        try {
+            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+            // Signed in successfully
+            handleGoogleSignInSuccess(account);
+        } catch (ApiException e) {
+            // The ApiException status code indicates the detailed failure reason.
+            showLoading(false);
+            String errorMessage = "Google Sign-In failed: ";
+            switch (e.getStatusCode()) {
+                case 10:
+                    errorMessage += "Developer error";
+                    break;
+                case 12501:
+                    errorMessage += "Sign-in cancelled";
+                    break;
+                case 7:
+                    errorMessage += "Network error";
+                    break;
+                default:
+                    errorMessage += "Error code: " + e.getStatusCode();
+                    break;
+            }
+            Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG).show();
+            Log.e("GoogleSignIn", "Sign-in failed: " + e.getStatusCode(), e);
+        }
+    }
+
+    private void handleGoogleSignInSuccess(GoogleSignInAccount account) {
+        if (account != null) {
+            String email = account.getEmail();
+            String displayName = account.getDisplayName();
+
+            // For Google accounts, we can use app-specific password or OAuth2
+            // For simplicity, we'll use the email and generate an app password hint
+            String appPasswordHint = "For Gmail, please use an App Password from your Google Account settings";
+
+            showLoading(false);
+            saveCredentialsAndProceed(email, appPasswordHint);
+
+            Toast.makeText(getContext(),
+                    "Welcome " + (displayName != null ? displayName : email) + "!",
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void authenticateUser(String email, String password) {
@@ -272,6 +366,7 @@ public class SignInFragment extends Fragment {
             passwordEditText.setEnabled(!loading);
             passwordToggle.setEnabled(!loading);
             signInButton.setEnabled(!loading);
+            googleSignInButton.setEnabled(!loading);
 
             if (loading) {
                 signInButton.setText("Signing in...");
@@ -289,5 +384,16 @@ public class SignInFragment extends Fragment {
 
     private boolean isValidEmail(String email) {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Check for existing Google Sign In account, if the user is already signed in
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(requireContext());
+        if (account != null) {
+            // User is already signed in, proceed directly
+            handleGoogleSignInSuccess(account);
+        }
     }
 }

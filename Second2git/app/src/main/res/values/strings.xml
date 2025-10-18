@@ -15,6 +15,6 @@
     <string name="cd_google">Google sign-in</string>
     <string name="cd_add_account">Add account</string>
     <string name="cd_search">search</string>
-    <!-- TODO: Remove or change this placeholder text -->
+    <string name="default_web_client_id">62736306781-78qn5pf39oi6kb71s0st88q2ld02opsl.apps.googleusercontent.com</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

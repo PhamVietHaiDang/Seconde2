@@ -209,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openComposeEmail() {
-        if (userEmail == null || userPassword != null) {
+        if (userEmail == null || userPassword == null) {
             showToast("Please sign in first");
             showSignInFragment();
             return;

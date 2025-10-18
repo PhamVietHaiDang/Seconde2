@@ -12,4 +12,10 @@ public class InboxFragment extends BaseEmailFragment {
     protected String getFragmentTag() {
         return "InboxFragment";
     }
+
+    @Override
+    protected void loadEmailData() {
+        // Use the optimized loading with progress
+        loadEmailDataWithProgress();
+    }
 }

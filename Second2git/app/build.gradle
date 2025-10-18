@@ -31,24 +31,25 @@ android {
     lintOptions {
         checkReleaseBuilds false
         abortOnError false
-        packagingOptions {
-            resources {
-                excludes += ['META-INF/NOTICE.md', 'META-INF/LICENSE.md', 'META-INF/notice.md', 'META-INF/license.md']
-            }
+    }
+
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/NOTICE.md', 'META-INF/LICENSE.md', 'META-INF/notice.md', 'META-INF/license.md']
         }
     }
 }
 
 dependencies {
-
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-
+    // Core Android dependencies
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.10.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
-    // Your existing email dependencies
+    // Swipe refresh
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+
+    // Email dependencies
     implementation 'com.sun.mail:android-mail:1.6.7'
     implementation 'com.sun.mail:android-activation:1.6.7'
 
@@ -56,19 +57,31 @@ dependencies {
     implementation 'androidx.room:room-runtime:2.6.1'
     annotationProcessor 'androidx.room:room-compiler:2.6.1'
 
-    // CORRECT Lifecycle dependencies for ViewModel
+    // Lifecycle dependencies for ViewModel
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.7.0'
     implementation 'androidx.lifecycle:lifecycle-livedata:2.7.0'
     implementation 'androidx.lifecycle:lifecycle-common-java8:2.7.0'
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
 
-    // Your existing dependencies
-    implementation 'androidx.navigation:navigation-fragment:2.7.4'
-    implementation 'androidx.navigation:navigation-ui:2.7.4'
-    implementation 'com.tbuonomo:dotsindicator:5.0'
+    // Fragment
     implementation 'androidx.fragment:fragment:1.6.1'
 
+    // Navigation
+    implementation 'androidx.navigation:navigation-fragment:2.7.4'
+    implementation 'androidx.navigation:navigation-ui:2.7.4'
+
+    // UI components
+    implementation 'com.tbuonomo:dotsindicator:5.0'
+
+    // Testing
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+
+    // Google Sign In
+    implementation 'com.google.android.gms:play-services-auth:20.7.0'
+
+
+    //Firebase if things go wrong
+    implementation 'com.google.firebase:firebase-auth:22.3.0'
+    implementation 'com.google.firebase:firebase-core:21.1.1'
 }

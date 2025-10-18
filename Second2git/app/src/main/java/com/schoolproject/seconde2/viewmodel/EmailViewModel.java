@@ -27,7 +27,7 @@ public class EmailViewModel extends AndroidViewModel {
         super(application);
         repository = new EmailRepository(application);
 
-        // Initialize with empty lists - NO SAMPLE DATA
+        // Initialize with empty lists
         allEmails.setValue(new ArrayList<>());
         inboxEmails.setValue(new ArrayList<>());
         sentEmails.setValue(new ArrayList<>());
@@ -55,7 +55,7 @@ public class EmailViewModel extends AndroidViewModel {
         if (userEmail != null && userPassword != null) {
             return repository.getEmailsByFolder(folder);
         } else {
-            // Return empty lists when not signed in - NO SAMPLE DATA
+            // Return empty lists when not signed in
             switch (folder) {
                 case "inbox":
                     return inboxEmails;
@@ -80,6 +80,19 @@ public class EmailViewModel extends AndroidViewModel {
             Toast.makeText(getApplication(), "Please sign in first", Toast.LENGTH_SHORT).show();
         }
     }
+
+    // SIMPLIFIED: Remove the problematic callback approach
+    public void refreshEmailsWithProgress(String folder) {
+        Log.d(TAG, "Refreshing emails with progress for folder: " + folder);
+        if (userEmail != null && userPassword != null) {
+            repository.fetchAndSaveEmails("imap.gmail.com", userEmail, userPassword, folder);
+            Toast.makeText(getApplication(), "Fetching " + folder + " emails...", Toast.LENGTH_SHORT).show();
+        } else {
+            Log.d(TAG, "User not signed in - cannot refresh emails");
+            Toast.makeText(getApplication(), "Please sign in first", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     public void sendEmail(String to, String subject, String body) {
         if (userEmail != null && userPassword != null) {
             repository.sendEmail("smtp.gmail.com", userEmail, userPassword, to, subject, body);
@@ -95,5 +108,10 @@ public class EmailViewModel extends AndroidViewModel {
 
     public String getUserEmail() {
         return userEmail;
+    }
+
+    // Clear cache when needed
+    public void clearCache() {
+        repository.clearCache();
     }
 }

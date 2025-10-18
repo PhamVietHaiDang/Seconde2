@@ -14,7 +14,9 @@ import java.util.concurrent.Executors;
 public class EmailService {
 
     private static final ExecutorService executor = Executors.newFixedThreadPool(2);
-    private static final int MAX_EMAILS = 30;
+    private static final int MAX_EMAILS = 10; // Reduced from 30 to 10 for faster loading
+    private static final int CONNECTION_TIMEOUT = 15000;
+    private static final int READ_TIMEOUT = 15000;
 
     private static final ThreadLocal<SimpleDateFormat> dateFormatCache = ThreadLocal.withInitial(() ->
             new SimpleDateFormat("MMM d, yyyy 'at' h:mm a", Locale.getDefault()));
@@ -28,10 +30,9 @@ public class EmailService {
             try {
                 Properties props = createImapProperties();
                 Session session = Session.getInstance(props);
-                store = session.getStore("imaps");
+                store = connectWithTimeout(host, user, pass, props);
 
                 long startTime = System.currentTimeMillis();
-                store.connect(host, user, pass);
 
                 String imapFolderName = getImapFolderName(folderName);
                 folder = store.getFolder(imapFolderName);
@@ -49,11 +50,14 @@ public class EmailService {
                 int messageCount = folder.getMessageCount();
 
                 if (messageCount > 0) {
-                    int start = Math.max(1, messageCount - MAX_EMAILS + 1);
+                    // Fetch only recent emails initially for faster loading
+                    int messagesToFetch = Math.min(MAX_EMAILS, messageCount);
+                    int start = Math.max(1, messageCount - messagesToFetch + 1);
                     int end = messageCount;
                     Message[] messages = folder.getMessages(start, end);
 
-                    processMessagesBatch(messages, folderName, emails);
+                    System.out.println("Fetching " + messages.length + " recent emails for faster loading");
+                    processMessagesBatchOptimized(messages, folderName, emails);
                 }
 
                 long endTime = System.currentTimeMillis();
@@ -71,20 +75,38 @@ public class EmailService {
         });
     }
 
-    private void processMessagesBatch(Message[] messages, String folderName, List<Email> emails) {
-        for (int i = 0; i < messages.length; i++) {
-            try {
-                System.out.println("Processing message " + (i + 1) + " of " + messages.length);
-                Email email = convertToEmail(messages[i], folderName);
-                if (email != null) {
-                    emails.add(email);
-                    System.out.println("✓ Loaded email: " + email.subject);
-                    System.out.println("  Is HTML: " + email.isHtml);
-                    System.out.println("  Body preview: " + (email.body != null ? email.body.substring(0, Math.min(100, email.body.length())) : "null"));
+    private Store connectWithTimeout(String host, String user, String pass, Properties props) throws Exception {
+        props.put("mail.imaps.connectiontimeout", String.valueOf(CONNECTION_TIMEOUT));
+        props.put("mail.imaps.timeout", String.valueOf(READ_TIMEOUT));
+        props.put("mail.imaps.writetimeout", String.valueOf(READ_TIMEOUT));
+
+        Session session = Session.getInstance(props);
+        Store store = session.getStore("imaps");
+        store.connect(host, user, pass);
+        return store;
+    }
+
+    private void processMessagesBatchOptimized(Message[] messages, String folderName, List<Email> emails) {
+        int batchSize = 3; // Smaller batches for better responsiveness
+        for (int i = 0; i < messages.length; i += batchSize) {
+            int end = Math.min(i + batchSize, messages.length);
+
+            for (int j = i; j < end; j++) {
+                try {
+                    System.out.println("Processing message " + (j + 1) + " of " + messages.length);
+                    Email email = convertToEmailOptimized(messages[j], folderName);
+                    if (email != null) {
+                        emails.add(email);
+                        System.out.println("✓ Loaded email: " + email.subject);
+                    }
+                } catch (Exception e) {
+                    System.out.println("✗ Error processing email: " + e.getMessage());
                 }
-            } catch (Exception e) {
-                System.out.println("✗ Error processing email: " + e.getMessage());
-                e.printStackTrace();
+            }
+
+            // Small delay between batches to prevent overwhelming the system
+            if (end < messages.length) {
+                try { Thread.sleep(50); } catch (InterruptedException e) { }
             }
         }
 
@@ -97,9 +119,9 @@ public class EmailService {
         props.put("mail.imaps.host", "imap.gmail.com");
         props.put("mail.imaps.port", "993");
         props.put("mail.imaps.ssl.enable", "true");
-        props.put("mail.imaps.timeout", "20000");
-        props.put("mail.imaps.connectiontimeout", "20000");
-        props.put("mail.imaps.fetchsize", "1048576");
+        props.put("mail.imaps.timeout", "15000");
+        props.put("mail.imaps.connectiontimeout", "15000");
+        props.put("mail.imaps.fetchsize", "524288"); // Reduced from 1MB to 512KB
         props.put("mail.imaps.partialfetch", "false");
         return props;
     }
@@ -126,10 +148,10 @@ public class EmailService {
         }
     }
 
-    private Email convertToEmail(Message message, String folder) throws Exception {
+    private Email convertToEmailOptimized(Message message, String folder) throws Exception {
         Email email = new Email();
 
-        // Extract sender with display name
+        // Extract basic info first (fast operations)
         email.sender = extractSenderWithDisplayName(message);
         email.subject = message.getSubject() != null ? message.getSubject() : "(No Subject)";
 
@@ -143,8 +165,8 @@ public class EmailService {
             email.date = "Unknown date";
         }
 
-        // Extract email content
-        EmailContent content = extractContentFromMessage(message);
+        // Extract content (slower operation - do it last)
+        EmailContent content = extractContentFromMessageOptimized(message);
         email.body = content.plainText;
         email.htmlContent = content.html;
         email.isHtml = content.isHtml;
@@ -198,18 +220,15 @@ public class EmailService {
         }
     }
 
-    // Extract content from message - returns both HTML and plain text
-    private EmailContent extractContentFromMessage(Message message) {
+    // Optimized content extraction
+    private EmailContent extractContentFromMessageOptimized(Message message) {
         try {
             Object content = message.getContent();
-            System.out.println("Content object type: " + content.getClass().getSimpleName());
 
             if (content instanceof String) {
                 String text = (String) content;
-                System.out.println("Found plain text email, length: " + text.length());
                 // Check if it's actually HTML disguised as plain text
                 if (isLikelyHtmlContent(text)) {
-                    System.out.println("Text content appears to be HTML, using as HTML email");
                     String cleanText = convertHtmlToCleanText(text);
                     return new EmailContent(text, cleanText, true);
                 } else {
@@ -218,56 +237,46 @@ public class EmailService {
                 }
             } else if (content instanceof Multipart) {
                 Multipart multipart = (Multipart) content;
-                System.out.println("Multipart with " + multipart.getCount() + " parts");
-                return extractContentFromMultipart(multipart);
+                return extractContentFromMultipartOptimized(multipart);
             }
         } catch (Exception e) {
             System.out.println("Error extracting content from message: " + e.getMessage());
-            e.printStackTrace();
         }
 
         String errorMsg = "Unable to load email content.";
         return new EmailContent("", errorMsg, false);
     }
 
-    private EmailContent extractContentFromMultipart(Multipart multipart) throws Exception {
+    private EmailContent extractContentFromMultipartOptimized(Multipart multipart) throws Exception {
         String htmlContent = "";
         String plainContent = "";
 
-        for (int i = 0; i < multipart.getCount(); i++) {
+        // Limit the number of parts we process for faster loading
+        int partsToProcess = Math.min(multipart.getCount(), 3);
+
+        for (int i = 0; i < partsToProcess; i++) {
             BodyPart bodyPart = multipart.getBodyPart(i);
             String contentType = bodyPart.getContentType();
-            System.out.println("Part " + i + " content type: " + contentType);
 
             if (bodyPart.isMimeType("text/plain") && plainContent.isEmpty()) {
                 String content = getBodyPartContent(bodyPart);
                 plainContent = cleanTextContent(content);
-                System.out.println("Found plain text part, length: " + plainContent.length());
             } else if (bodyPart.isMimeType("text/html") && htmlContent.isEmpty()) {
                 String content = getBodyPartContent(bodyPart);
                 htmlContent = content;
-                System.out.println("Found HTML part, length: " + htmlContent.length());
-                System.out.println("HTML preview: " + content.substring(0, Math.min(300, content.length())));
-            } else if (bodyPart.getContent() instanceof Multipart) {
-                // Recursive call for nested multipart
-                System.out.println("Found nested multipart in part " + i);
-                EmailContent nestedContent = extractContentFromMultipart((Multipart) bodyPart.getContent());
-                if (htmlContent.isEmpty() && !nestedContent.html.isEmpty()) {
-                    htmlContent = nestedContent.html;
-                }
-                if (plainContent.isEmpty() && !nestedContent.plainText.isEmpty()) {
-                    plainContent = nestedContent.plainText;
-                }
+            }
+
+            // Early exit if we found both content types
+            if (!htmlContent.isEmpty() && !plainContent.isEmpty()) {
+                break;
             }
         }
 
         // SIMPLIFIED DECISION: If HTML content exists and is reasonable, use it
         if (!htmlContent.isEmpty() && htmlContent.length() > 50) {
-            System.out.println("Using HTML content for email display");
             String cleanPlainText = !plainContent.isEmpty() ? plainContent : convertHtmlToCleanText(htmlContent);
             return new EmailContent(htmlContent, cleanPlainText, true);
         } else if (!plainContent.isEmpty()) {
-            System.out.println("Using plain text content");
             return new EmailContent("", plainContent, false);
         } else {
             String noContent = "No readable content found in this email.";
@@ -315,15 +324,6 @@ public class EmailService {
                 .replaceAll("&gt;", ">")
                 .replaceAll("&quot;", "\"")
                 .replaceAll("&#39;", "'")
-                .replaceAll("&rsquo;", "'")
-                .replaceAll("&lsquo;", "'")
-                .replaceAll("&rdquo;", "\"")
-                .replaceAll("&ldquo;", "\"")
-                .replaceAll("&ndash;", "-")
-                .replaceAll("&mdash;", "-")
-                .replaceAll("&copy;", "(c)")
-                .replaceAll("&reg;", "(r)")
-                .replaceAll("&trade;", "(tm)")
                 // Clean up whitespace
                 .replaceAll("\\s+", " ")
                 .trim();
@@ -348,14 +348,6 @@ public class EmailService {
                 .replaceAll("\\</p\\>", "\n")
                 .replaceAll("\\<div\\s*[^>]*\\>", "\n")
                 .replaceAll("\\</div\\>", "\n")
-                .replaceAll("\\<li\\s*[^>]*\\>", "\n• ")
-                .replaceAll("\\</li\\>", "\n")
-                .replaceAll("\\<ul\\s*[^>]*\\>", "\n")
-                .replaceAll("\\</ul\\>", "\n")
-                .replaceAll("\\<ol\\s*[^>]*\\>", "\n")
-                .replaceAll("\\</ol\\>", "\n")
-                .replaceAll("\\<h[1-6]\\s*[^>]*\\>", "\n\n")
-                .replaceAll("\\</h[1-6]\\>", "\n\n")
                 .replaceAll("\\<[^>]*>", "")
                 .replaceAll("\\s+", " ")
                 .trim();
